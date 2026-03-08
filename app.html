@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Shopping Recommendations</title>
+  <style>
+    :root{
+      --bg:#0b0f17;--card:#121a28;--card2:#0f1624;--text:#e7eefc;--muted:#a9b7d3;
+      --line:#24324c;--btn:#2f66ff;--btn2:#24324c;--good:#19c37d;--warn:#ffcc00;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text)}
+    a{color:inherit}
+    .wrap{max-width:980px;margin:0 auto;padding:22px}
+    .top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}
+    .crumb{color:var(--muted);font-size:13px}
+    .pill{border:1px solid var(--line);padding:4px 10px;border-radius:999px;color:var(--muted);font-size:12px}
+    h1{font-size:20px;margin:0}
+    h2{font-size:16px;margin:0 0 8px}
+    p{margin:0;color:var(--muted);line-height:1.45}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin:12px 0}
+    .row{display:flex;gap:12px;flex-wrap:wrap}
+    .col{flex:1;min-width:240px}
+    label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
+    input[type="text"], select{width:100%;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:var(--card2);color:var(--text)}
+    input[type="range"]{width:100%}
+    .q{margin:10px 0}
+    .actions{display:flex;justify-content:flex-end;gap:10px;margin-top:12px}
+    button{cursor:pointer;border:1px solid transparent;border-radius:12px;padding:10px 12px;font-weight:600}
+    .primary{background:var(--btn);color:white}
+    .secondary{background:transparent;border-color:var(--line);color:var(--text)}
+    .small{font-size:13px;padding:9px 10px;border-radius:10px}
+    .explainTitle{display:flex;justify-content:space-between;align-items:center;gap:10px}
+    .explainTitle strong{font-size:13px}
+    .explainBox{background:rgba(255,255,255,.02);border:1px solid var(--line);border-radius:14px;padding:12px}
+    .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+    .muted{color:var(--muted)}
+    .hr{height:1px;background:var(--line);margin:12px 0}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+    .prod{background:rgba(255,255,255,.02);border:1px solid var(--line);border-radius:16px;padding:12px}
+    .prod h3{margin:0 0 6px;font-size:15px}
+    .prod .meta{font-size:12px;color:var(--muted);margin-bottom:8px}
+    .badge{display:inline-block;border:1px solid var(--line);padding:2px 8px;border-radius:999px;font-size:12px;color:var(--muted);margin-left:8px}
+    .confirm{margin-top:10px;color:var(--good);font-weight:600}
+    .hidden{display:none}
+    .strike{color:var(--muted);text-decoration:line-through}
+    .footerNote{font-size:12px;color:var(--muted);margin-top:14px}
+    .jsonBox{white-space:pre-wrap;background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:12px;font-size:12px}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <div>
+        <div class="crumb" id="crumb">Study</div>
+        <h1 id="pageTitle">Shopping Study</h1>
+      </div>
+      <div class="pill" id="pill">product=? • cond=?</div>
+    </div>
+
+    <!-- PAGE 1: Pre-questions -->
+    <div id="pageIntake">
+      <div class="card">
+        <h2>Step 1 — Quick preference questions</h2>
+        <p>Please answer the questions below. (These questions are identical across all conditions.)</p>
+        <div class="hr"></div>
+
+        <div class="row">
+          <div class="col q">
+            <label for="goal">1) What is your main goal for this purchase?</label>
+            <select id="goal">
+              <option value="quality">Get the best overall quality</option>
+              <option value="value">Get the best value for the price</option>
+              <option value="speed">Decide quickly with minimal effort</option>
+              <option value="explore">Explore options and discover something new</option>
+            </select>
+          </div>
+          <div class="col q">
+            <label for="budget">2) Roughly what is your budget level for this purchase?</label>
+            <select id="budget">
+              <option value="low">Low</option>
+              <option value="mid" selected>Medium</option>
+              <option value="high">High</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col q">
+            <label>3) How important are user ratings/reviews to you?</label>
+            <input id="reviews" type="range" min="1" max="7" value="4"/>
+            <div class="muted">Current: <span id="reviewsVal">4</span> / 7</div>
+          </div>
+          <div class="col q">
+            <label>4) How important are product details/specifications to you?</label>
+            <input id="specs" type="range" min="1" max="7" value="4"/>
+            <div class="muted">Current: <span id="specsVal">4</span> / 7</div>
+          </div>
+        </div>
+
+        <div class="q">
+          <label for="style">5) Which statement best describes your shopping style today?</label>
+          <select id="style">
+            <option value="delegate">I prefer the system to narrow things down for me.</option>
+            <option value="balanced" selected>I want a balanced mix of guidance and choice.</option>
+            <option value="handsOn">I want to stay hands-on and in control.</option>
+          </select>
+        </div>
+
+        <div class="actions">
+          <button class="primary" id="toResults">Continue</button>
+        </div>
+      </div>
+      <div class="footerNote">Note: This demo stores responses locally in your browser (localStorage). It does not send data anywhere.</div>
+    </div>
+
+    <!-- PAGE 2: Results -->
+    <div id="pageResults" class="hidden">
+      <div class="card">
+        <div class="explainTitle">
+          <h2>Recommended for you</h2>
+          <span class="badge" id="condBadge">Condition</span>
+        </div>
+
+        <!-- Explanation box (IDENTICAL across A/B/C/D) -->
+        <div class="explainBox" id="explainBox">
+          <strong>How these recommendations were generated</strong>
+          <div class="muted" style="margin-top:8px;">
+            Our system uses 50% of your inputs and 50% of product details with user feedback to generate the recommendations for you.
+          </div>
+          <div class="muted" style="margin-top:10px;" id="reasonLineWrap">
+            <span class="mono">Key signal used:</span>
+            <span id="reasonLine">Your response to one question from your initial survey (weighted heavily)</span>
+          </div>
+        </div>
+
+        <!-- Action options area (THIS is the manipulation) -->
+        <div class="card" style="margin:12px 0 0;" id="actionArea">
+          <!-- Control block -->
+          <div id="controlBlock" class="hidden">
+            <h2 style="margin-bottom:6px;">Customize your recommendations</h2>
+            <p>Adjust the balance below to customize your results.</p>
+            <div class="hr"></div>
+            <label class="muted">More of my inputs <span class="muted" style="float:right;">More product details & user feedback</span></label>
+            <input id="balance" type="range" min="0" max="100" value="50"/>
+            <div class="muted">Balance: <span id="balanceVal">50</span>% inputs / <span id="balanceVal2">50</span>% product details & feedback</div>
+            <div class="confirm hidden" id="controlConfirm">Recommendations updated based on your settings.</div>
+          </div>
+
+          <!-- Recourse block -->
+          <div id="recourseBlock" class="hidden">
+            <h2 style="margin-bottom:6px;">Feedback and corrections</h2>
+            <p>If you disagree with this reason, you can remove it.</p>
+            <div class="hr"></div>
+            <button class="secondary small" id="removeReasonBtn">Remove this reason (don’t use that survey response)</button>
+            <div class="confirm hidden" id="recourseConfirm">Reason removed. We won’t use that survey response.</div>
+          </div>
+
+          <!-- Empty block for Condition A (and partial for B/C) -->
+          <div id="emptyBlock" class="muted hidden">No additional options are available on this page.</div>
+        </div>
+
+        <!-- Product cards -->
+        <div class="grid" id="productsGrid" style="margin-top:12px;"></div>
+
+        <div class="actions">
+          <button class="secondary" id="backToIntake">Back</button>
+          <button class="primary" id="finish">Finish</button>
+        </div>
+      </div>
+
+      <div class="card hidden" id="pageEnd">
+        <h2>End</h2>
+        <p class="muted">Below is the locally stored response JSON for quick testing/export.</p>
+        <div class="hr"></div>
+        <div class="jsonBox" id="jsonOut"></div>
+        <div class="actions">
+          <button class="secondary" id="copyJson">Copy JSON</button>
+          <a class="primary" id="homeLink" href="index.html" style="text-decoration:none;display:inline-block;">Back to launcher</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+(function(){
+  const params = new URLSearchParams(window.location.search);
+  const product = (params.get('product') || 'wine').toLowerCase();
+  const cond = (params.get('cond') || 'A').toUpperCase();
+  const pill = document.getElementById('pill');
+  const crumb = document.getElementById('crumb');
+  const title = document.getElementById('pageTitle');
+  const condBadge = document.getElementById('condBadge');
+
+  pill.textContent = `product=${product} • cond=${cond}`;
+  crumb.textContent = 'Actionable Transparency Study';
+  title.textContent = product === 'usb' ? 'USB Drive Recommendations' : 'Wine Recommendations';
+  condBadge.textContent = `Condition ${cond}`;
+
+  // Product cards (fixed)
+  const wineItems = [
+    {name:'Red Blend Selection', meta:'Medium-bodied • Smooth finish', desc:'A balanced red blend with fruit-forward notes and a smooth finish.'},
+    {name:'Crisp White Selection', meta:'Light-bodied • Refreshing', desc:'A crisp white with bright acidity and clean, refreshing character.'},
+    {name:'Sparkling Selection', meta:'Dry • Celebratory', desc:'A dry sparkling option with fine bubbles and a clean profile.'}
+  ];
+  const usbItems = [
+    {name:'USB Drive A', meta:'Reliable • Everyday use', desc:'A dependable USB drive suitable for daily file transfers and backups.'},
+    {name:'USB Drive B', meta:'Compact • Portable', desc:'A compact USB drive designed for portability and convenience.'},
+    {name:'USB Drive C', meta:'Durable • Sturdy build', desc:'A sturdy USB drive with a durable build for frequent use.'}
+  ];
+  const items = product === 'usb' ? usbItems : wineItems;
+  const grid = document.getElementById('productsGrid');
+  grid.innerHTML = items.map((it)=>`
+    <div class="prod">
+      <h3>${it.name}</h3>
+      <div class="meta">${it.meta}</div>
+      <div class="muted" style="font-size:13px;line-height:1.45">${it.desc}</div>
+    </div>
+  `).join('');
+
+  // Intake sliders
+  const reviews = document.getElementById('reviews');
+  const specs = document.getElementById('specs');
+  const reviewsVal = document.getElementById('reviewsVal');
+  const specsVal = document.getElementById('specsVal');
+  reviews.addEventListener('input', ()=> reviewsVal.textContent = reviews.value);
+  specs.addEventListener('input', ()=> specsVal.textContent = specs.value);
+
+  // Navigation
+  const pageIntake = document.getElementById('pageIntake');
+  const pageResults = document.getElementById('pageResults');
+  const pageEnd = document.getElementById('pageEnd');
+
+  function showResults(){
+    pageIntake.classList.add('hidden');
+    pageResults.classList.remove('hidden');
+    pageEnd.classList.add('hidden');
+  }
+  function showIntake(){
+    pageResults.classList.add('hidden');
+    pageIntake.classList.remove('hidden');
+    pageEnd.classList.add('hidden');
+  }
+  function showEnd(){
+    pageEnd.classList.remove('hidden');
+  }
+
+  // Manipulation: show/hide action blocks based on condition
+  const controlBlock = document.getElementById('controlBlock');
+  const recourseBlock = document.getElementById('recourseBlock');
+  const emptyBlock = document.getElementById('emptyBlock');
+
+  const hasControl = (cond === 'B' || cond === 'D');
+  const hasRecourse = (cond === 'C' || cond === 'D');
+
+  controlBlock.classList.toggle('hidden', !hasControl);
+  recourseBlock.classList.toggle('hidden', !hasRecourse);
+  emptyBlock.classList.toggle('hidden', hasControl || hasRecourse);
+
+  // Control behavior
+  const balance = document.getElementById('balance');
+  const balanceVal = document.getElementById('balanceVal');
+  const balanceVal2 = document.getElementById('balanceVal2');
+  const controlConfirm = document.getElementById('controlConfirm');
+  if (hasControl){
+    balance.addEventListener('input', ()=>{
+      const v = parseInt(balance.value, 10);
+      balanceVal.textContent = v;
+      balanceVal2.textContent = 100 - v;
+      controlConfirm.classList.remove('hidden');
+    });
+  }
+
+  // Recourse behavior
+  const removeBtn = document.getElementById('removeReasonBtn');
+  const recourseConfirm = document.getElementById('recourseConfirm');
+  const reasonLine = document.getElementById('reasonLine');
+
+  let recourseClicked = false;
+
+  if (hasRecourse){
+    removeBtn.addEventListener('click', ()=>{
+      if (recourseClicked) return;
+      recourseClicked = true;
+      // (a) acknowledgement
+      recourseConfirm.classList.remove('hidden');
+      // (b) visible removal
+      reasonLine.textContent = "Your response to one question from your initial survey (Removed)";
+      // disable button
+      removeBtn.disabled = true;
+      removeBtn.style.opacity = "0.6";
+      removeBtn.style.cursor = "not-allowed";
+    });
+  }
+
+  // Save and finish
+  const toResults = document.getElementById('toResults');
+  const backToIntake = document.getElementById('backToIntake');
+  const finish = document.getElementById('finish');
+
+  function collectIntake(){
+    return {
+      goal: document.getElementById('goal').value,
+      budget: document.getElementById('budget').value,
+      reviewsImportance: parseInt(reviews.value,10),
+      specsImportance: parseInt(specs.value,10),
+      style: document.getElementById('style').value
+    };
+  }
+
+  function buildPayload(){
+    const intake = collectIntake();
+    const payload = {
+      timestamp: new Date().toISOString(),
+      product: product,
+      condition: cond,
+      intake: intake,
+      actions: {
+        controlMoved: hasControl ? (controlConfirm && !controlConfirm.classList.contains('hidden')) : false,
+        balanceValue: hasControl ? parseInt(balance.value,10) : null,
+        recourseClicked: hasRecourse ? recourseClicked : false
+      }
+    };
+    return payload;
+  }
+
+  toResults.addEventListener('click', ()=>{
+    const payload = buildPayload();
+    localStorage.setItem('rs_study_last', JSON.stringify(payload));
+    showResults();
+  });
+
+  backToIntake.addEventListener('click', ()=>{
+    showIntake();
+  });
+
+  finish.addEventListener('click', ()=>{
+    const payload = buildPayload();
+    localStorage.setItem('rs_study_last', JSON.stringify(payload));
+    const out = document.getElementById('jsonOut');
+    out.textContent = JSON.stringify(payload, null, 2);
+    showEnd();
+    window.scrollTo({top: document.body.scrollHeight, behavior:'smooth'});
+  });
+
+  // Copy JSON
+  document.getElementById('copyJson').addEventListener('click', async ()=>{
+    const txt = document.getElementById('jsonOut').textContent || '';
+    try{
+      await navigator.clipboard.writeText(txt);
+      alert('Copied!');
+    } catch(e){
+      alert('Copy failed. You can manually select the JSON and copy.');
+    }
+  });
+
+})();
+</script>
+</body>
+</html>

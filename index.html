@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Recommender Study Launcher</title>
+  <style>
+    :root{--bg:#0b0f17;--card:#121a28;--text:#e7eefc;--muted:#a9b7d3;--line:#24324c;--btn:#2f66ff;}
+    *{box-sizing:border-box} body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text)}
+    .wrap{max-width:980px;margin:0 auto;padding:28px}
+    h1{font-size:22px;margin:0 0 8px}
+    p{color:var(--muted);margin:0 0 18px;line-height:1.45}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px}
+    .card h2{font-size:16px;margin:0 0 10px}
+    .links a{display:block;color:var(--text);text-decoration:none;padding:9px 10px;border:1px solid var(--line);border-radius:10px;margin:8px 0;background:rgba(255,255,255,.02)}
+    .links a:hover{border-color:#3a507a}
+    .tag{display:inline-block;font-size:12px;color:var(--muted);border:1px solid var(--line);padding:3px 8px;border-radius:999px;margin-left:8px}
+    .note{margin-top:18px;padding:12px 14px;border:1px dashed var(--line);border-radius:14px;color:var(--muted);font-size:13px}
+    code{color:#d7e3ff}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Actionable Transparency Study (Wine × USB) — Launcher</h1>
+    <p>Choose a product context and condition. Each link opens the same flow: 5 pre-questions → results page. The only manipulation is the action options under the explanation box.</p>
+
+    <div class="grid">
+      <div class="card">
+        <h2>Wine (Hedonic) <span class="tag">product=wine</span></h2>
+        <div class="links">
+          <a href="app.html?product=wine&cond=A">A — Explanation-only</a>
+          <a href="app.html?product=wine&cond=B">B — Explanation + Control (slider)</a>
+          <a href="app.html?product=wine&cond=C">C — Explanation + Recourse (remove reason)</a>
+          <a href="app.html?product=wine&cond=D">D — Explanation + Control + Recourse</a>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>USB Drive (Utilitarian) <span class="tag">product=usb</span></h2>
+        <div class="links">
+          <a href="app.html?product=usb&cond=A">A — Explanation-only</a>
+          <a href="app.html?product=usb&cond=B">B — Explanation + Control (slider)</a>
+          <a href="app.html?product=usb&cond=C">C — Explanation + Recourse (remove reason)</a>
+          <a href="app.html?product=usb&cond=D">D — Explanation + Control + Recourse</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="note">
+      <strong>Note:</strong> This is a simple stimulus/prototype for GitHub Pages. It does not collect data server-side. You can export responses by copying the JSON shown at the end (or extend it later).
+      <br/>Condition is read from <code>?cond=A|B|C|D</code>, product from <code>?product=wine|usb</code>.
+    </div>
+  </div>
+</body>
+</html>
