@@ -1,11 +1,13 @@
-# RS Transparency Demo — FINAL v4.2 (Locked buttons after choice)
+# RS Recourse Demo — FINAL v5 (Feels real)
 
-This fixes the remaining issue visible in your screenshot:
-- After choosing **Keep current**, the **Use alternative** button is now disabled too.
-- After choosing **Use alternative**, both buttons are disabled (same as before).
+This version fixes the “manipulation doesn’t feel like recourse” problem.
 
 Recourse (C/D):
-1) Keep vs Remove reason (both valid; no forced deletion)
-2) Alternative preview shown once
-3) Keep current vs Use alternative (choice locks both buttons)
-Finish is gated until the keep/use decision is made.
+1) **Voice (confirm vs contest a specific reason)** tied to the participant’s actual quiz answer.
+   - If contested, the system visibly **refreshes** the list (re-rank + “Updated after your correction”).
+2) **Repair (hide one item → alternative appears)** with badge + highlight.
+
+Exposure:
+- In recourse conditions, **Finish is gated** until Step 1 and Step 2 are completed.
+
+Upload `index.html`, `app.html`, `README.md` to repo root for GitHub Pages.
