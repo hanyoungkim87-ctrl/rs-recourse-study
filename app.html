@@ -10,6 +10,7 @@
       --card:#ffffff; --border:#e6e0d6;
       --accent:#2f6f4e; --accent2:#b04a63;
       --shadow:0 10px 40px rgba(0,0,0,.10);
+      --hi:#fff3b0;
     }
     body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink)}
     .hero{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:40px 18px;background:linear-gradient(180deg, rgba(0,0,0,.03), rgba(0,0,0,0));}
@@ -57,6 +58,7 @@
     .confirmMsg.show{display:block}
     .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-top:16px}
     .pCard{border:1px solid var(--border);border-radius:14px;padding:14px;background:#fff}
+    .pCard.flash{outline:3px solid var(--hi)}
     .pName{font-weight:750;margin:0 0 6px}
     .badge{display:inline-block;font-size:12px;background:#f3efe7;border:1px solid var(--border);border-radius:999px;padding:4px 8px;margin-bottom:8px;color:#444}
     .note{margin-top:14px;color:#9b2c44;font-size:14px;letter-spacing:.18em}
@@ -65,12 +67,12 @@
 
     .previewBox{margin-top:10px;border:1px dashed #d8d0c3;border-radius:12px;padding:12px;background:#fff}
     .previewTop{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
-    .previewTop b{font-size:14px}
     .choiceBtns{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
     .miniBtn{border:1px solid var(--border);background:#f3efe7;border-radius:999px;padding:9px 12px;cursor:pointer;font-weight:650}
     .miniBtn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
     .miniBtn:disabled{opacity:.55;cursor:not-allowed}
-
+    .miniBtn.primary:disabled{background:#b9cbbf;border-color:#b9cbbf;color:#fff}
+    .statusLine{margin-top:8px;font-size:13px;color:#555}
     @media (max-width:520px){
       h1{font-size:34px}
       .modalTitle{font-size:30px}
@@ -100,7 +102,6 @@
     </div>
   </div>
 
-  <!-- QUIZ MODAL -->
   <div class="overlay" id="quizOverlay">
     <div class="modal" role="dialog" aria-modal="true">
       <button class="close" id="quizClose" aria-label="Close">×</button>
@@ -118,7 +119,6 @@
     </div>
   </div>
 
-  <!-- CONTROL MODAL -->
   <div class="overlay" id="controlOverlay">
     <div class="modal" role="dialog" aria-modal="true">
       <button class="close" id="controlClose" aria-label="Close">×</button>
@@ -127,21 +127,16 @@
           <div class="modalTitle">Control (Steering)</div>
           <div class="condBadge">Confirm</div>
         </div>
-
         <div class="explainBox">
           <b>Our system uses 50% of your inputs and 50% of product details with user feedback</b> to generate the recommendations for you.
           <span style="color:var(--accent2);font-weight:650">You can adjust the balance using the slider below to customize your results.</span>
         </div>
-
         <div class="sliderRow">
           <input type="range" min="0" max="100" value="50" id="balanceSlider" />
           <div class="rangeLabels">
-            <span>Your Quiz Input</span>
-            <span style="letter-spacing:normal">Balanced</span>
-            <span>Product Details<br/>with User Feedback</span>
+            <span>Your Quiz Input</span><span style="letter-spacing:normal">Balanced</span><span>Product Details<br/>with User Feedback</span>
           </div>
         </div>
-
         <div class="footerRow">
           <button class="nextBtn" id="controlConfirm" type="button">Confirm</button>
         </div>
@@ -149,7 +144,6 @@
     </div>
   </div>
 
-  <!-- RESULTS MODAL -->
   <div class="overlay" id="resultsOverlay">
     <div class="modal" role="dialog" aria-modal="true">
       <button class="close" id="resultsClose" aria-label="Close">×</button>
@@ -166,38 +160,37 @@
             <b>Key signal used:</b> <span id="keySignal"></span>
           </div>
 
-          <!-- Recourse block (C/D only) -->
           <div class="recourseRow" id="recourseRow">
-            <div class="stepTitle">Feedback and corrections (2 quick steps)</div>
+            <div class="stepTitle">Feedback and corrections (2 steps)</div>
 
             <div class="stepRow">
-              <span><b>Step 1:</b> Remove a reason you disagree with.</span>
-              <button class="recourseBtn" id="removeReasonBtn" type="button">Remove this reason (don’t use that slider response)</button>
-              <div class="confirmMsg" id="confirm1">Reason removed. We won’t use that slider response.</div>
+              <span><b>Step 1:</b> Contest a reason.</span>
+              <button class="recourseBtn" id="removeReasonBtn" type="button">Remove this reason</button>
+              <div class="confirmMsg" id="confirm1">Reason removed (acknowledged).</div>
             </div>
 
             <div class="stepRow">
-              <span><b>Step 2:</b> Preview an alternative, then choose keep vs replace.</span>
-              <button class="recourseBtn" id="previewAltBtn" type="button">Show an alternative (preview)</button>
-              <div class="confirmMsg" id="confirm2">Alternative shown. Choose keep vs replace to continue.</div>
+              <span><b>Step 2:</b> Preview one alternative.</span>
+              <button class="recourseBtn" id="previewAltBtn" type="button">Show one alternative</button>
+              <div class="confirmMsg" id="confirm2">Alternative shown. Choose keep vs switch to continue.</div>
             </div>
 
             <div class="previewBox" id="previewBox" style="display:none;">
               <div class="previewTop">
-                <b>Alternative (preview)</b>
-                <span class="badge">Preview</span>
+                <b>Alternative suggestion (preview)</b>
+                <span class="badge" id="previewStatus">Preview</span>
               </div>
               <div id="previewCard"></div>
+              <div class="statusLine" id="decisionLine" style="display:none;"></div>
               <div class="choiceBtns">
-                <button class="miniBtn" id="keepBtn" type="button">Keep current recommendation</button>
-                <button class="miniBtn primary" id="replaceBtn" type="button">Replace with alternative</button>
+                <button class="miniBtn" id="keepBtn" type="button">Keep current</button>
+                <button class="miniBtn primary" id="switchBtn" type="button">Switch to alternative</button>
               </div>
             </div>
           </div>
         </div>
 
         <div class="cards" id="cards"></div>
-
         <div class="note">PLEASE CAREFULLY REVIEW THIS PAGE, INCLUDING THE EXPLANATION AT THE TOP.</div>
 
         <div class="footerRow">
@@ -224,7 +217,6 @@
 
   document.getElementById('backBtn').addEventListener('click', ()=> location.href='index.html');
 
-  // overlays
   const quizOverlay = document.getElementById('quizOverlay');
   const controlOverlay = document.getElementById('controlOverlay');
   const resultsOverlay = document.getElementById('resultsOverlay');
@@ -255,10 +247,9 @@
   const questions = (product === 'usb') ? usbQuestions : wineQuestions;
   quizTitle.textContent = (product === 'usb') ? 'USB Finder Quiz' : 'Wine Pairing Quiz';
 
-  // Concrete key signal (less vague)
   const keySignalBase = (product === 'usb')
-    ? 'Your response to the quiz slider about transfer speed (weighted heavily)'
-    : 'Your response to the quiz slider about refreshing vs cozy (weighted heavily)';
+    ? 'Your answer to “transfer speed” in the quiz (weighted heavily)'
+    : 'Your answer to “refreshing vs cozy” in the quiz (weighted heavily)';
 
   let step = 0;
   const answers = Array(questions.length).fill(null);
@@ -316,17 +307,21 @@
     }
   });
 
+  // start quiz
   document.getElementById('startBtn').addEventListener('click', ()=>{
     step=0; for(let i=0;i<answers.length;i++) answers[i]=null;
     renderStep(); show(quizOverlay);
   });
 
+  // close buttons
   document.getElementById('quizClose').addEventListener('click', ()=> hide(quizOverlay));
   document.getElementById('controlClose').addEventListener('click', ()=> hide(controlOverlay));
   document.getElementById('resultsClose').addEventListener('click', ()=> hide(resultsOverlay));
+
+  // control confirm
   document.getElementById('controlConfirm').addEventListener('click', ()=>{ hide(controlOverlay); showResults(); });
 
-  // Results elements
+  // results + recourse
   const recourseRow = document.getElementById('recourseRow');
   const removeReasonBtn = document.getElementById('removeReasonBtn');
   const previewAltBtn = document.getElementById('previewAltBtn');
@@ -335,23 +330,28 @@
   const keySignal = document.getElementById('keySignal');
   const previewBox = document.getElementById('previewBox');
   const previewCard = document.getElementById('previewCard');
+  const previewStatus = document.getElementById('previewStatus');
+  const decisionLine = document.getElementById('decisionLine');
   const keepBtn = document.getElementById('keepBtn');
-  const replaceBtn = document.getElementById('replaceBtn');
+  const switchBtn = document.getElementById('switchBtn');
   const finishBtn = document.getElementById('finishBtn');
 
   let removedReason = false;
   let previewShown = false;
-  let userChoice = null; // 'keep' or 'replace'
+  let decision = null; // 'keep' or 'switch'
 
-  function renderCards(items){
+  function renderCards(items, flashIndex=null){
     const cards = document.getElementById('cards');
     cards.innerHTML = '';
-    items.forEach((it)=>{
+    items.forEach((it, idx)=>{
       const c = document.createElement('div');
-      c.className='pCard';
+      c.className='pCard' + ((flashIndex===idx)?' flash':'');
       const badge = it.badge ? `<div class="badge">${it.badge}</div>` : '';
       c.innerHTML = `${badge}<div class="pName">${it.name}</div><ul>${it.bullets.map(b=>`<li>${b}</li>`).join('')}</ul>`;
       cards.appendChild(c);
+      if(flashIndex===idx){
+        setTimeout(()=>c.classList.remove('flash'), 800);
+      }
     });
   }
 
@@ -381,44 +381,41 @@
 
   function showResults(){
     recourseRow.style.display = hasRecourse ? 'flex' : 'none';
-
-    removedReason = false;
-    previewShown = false;
-    userChoice = null;
+    removedReason = false; previewShown = false; decision = null;
 
     confirm1.classList.remove('show');
     confirm2.classList.remove('show');
+    previewBox.style.display = 'none';
+    decisionLine.style.display = 'none';
+    decisionLine.textContent = '';
+    previewStatus.textContent = 'Preview';
 
     keySignal.textContent = keySignalBase;
+
+    removeReasonBtn.disabled = false;
+    previewAltBtn.disabled = true;
+    keepBtn.disabled = true;
+    switchBtn.disabled = true;
+
     renderCards(JSON.parse(JSON.stringify(baseItems)));
 
-    // Reset recourse UI
-    removeReasonBtn.disabled = false;
-    previewAltBtn.disabled = true; // locked until step 1
-    previewBox.style.display = 'none';
-    keepBtn.disabled = true;
-    replaceBtn.disabled = true;
-
-    // Finish gating for recourse conditions
-    finishBtn.disabled = hasRecourse; // require a keep/replace choice after preview
+    // For recourse conditions, require a decision after preview
+    finishBtn.disabled = hasRecourse;
     finishBtn.style.opacity = finishBtn.disabled ? '0.55' : '1';
 
     document.getElementById('resultsTitle').textContent = (product === 'usb') ? 'USB Recommendations' : 'Wine Recommendations';
     show(resultsOverlay);
   }
 
-  // Step 1
   removeReasonBtn.addEventListener('click', ()=>{
     if(!hasRecourse) return;
     removedReason = true;
     confirm1.classList.add('show');
-    keySignal.textContent = keySignalBase.replace('(weighted heavily)','(Removed)');
+    keySignal.textContent = keySignalBase.replace('(weighted heavily)', '(removed at your request)');
     removeReasonBtn.disabled = true;
-
-    previewAltBtn.disabled = false; // unlock step 2
+    previewAltBtn.disabled = false;
   });
 
-  // Step 2: show preview (mandatory)
   previewAltBtn.addEventListener('click', ()=>{
     if(!hasRecourse || !removedReason) return;
     previewShown = true;
@@ -428,9 +425,8 @@
     previewBox.style.display = 'block';
     renderPreview(altItem);
 
-    // Enable the choice buttons
     keepBtn.disabled = false;
-    replaceBtn.disabled = false;
+    switchBtn.disabled = false;
   });
 
   function enableFinish(){
@@ -440,25 +436,27 @@
 
   keepBtn.addEventListener('click', ()=>{
     if(!hasRecourse || !previewShown) return;
-    userChoice = 'keep';
-    // no change to main list, but acknowledge choice visually
+    decision = 'keep';
+    previewStatus.textContent = 'Decision recorded';
+    decisionLine.style.display = 'block';
+    decisionLine.textContent = 'No changes made. Keeping the current recommendations.';
     keepBtn.disabled = true;
-    replaceBtn.disabled = true;
-    previewBox.querySelector('.badge').textContent = 'Preview (kept current)';
+    switchBtn.disabled = true;
     enableFinish();
   });
 
-  replaceBtn.addEventListener('click', ()=>{
+  switchBtn.addEventListener('click', ()=>{
     if(!hasRecourse || !previewShown) return;
-    userChoice = 'replace';
-    // visible change: replace the right-most recommendation with the alternative
+    decision = 'switch';
     const items = JSON.parse(JSON.stringify(baseItems));
-    items[2] = altItem;
-    renderCards(items);
+    items[2] = altItem; // replace right-most item
+    renderCards(items, 2);
 
+    previewStatus.textContent = 'Decision recorded';
+    decisionLine.style.display = 'block';
+    decisionLine.textContent = 'Updated. The right-most recommendation has been replaced with the alternative.';
     keepBtn.disabled = true;
-    replaceBtn.disabled = true;
-    previewBox.querySelector('.badge').textContent = 'Preview (replaced)';
+    switchBtn.disabled = true;
     enableFinish();
   });
 
@@ -477,27 +475,14 @@
       sliderBalance: hasControl ? Number(document.getElementById('balanceSlider').value) : null,
       recourse_step1_removeReason: hasRecourse ? removedReason : null,
       recourse_step2_previewShown: hasRecourse ? previewShown : null,
-      recourse_step2_choice: hasRecourse ? userChoice : null,
+      recourse_step2_decision: hasRecourse ? decision : null,
       timestamp: new Date().toISOString()
     };
     alert('Demo finished.\n\n' + JSON.stringify(payload, null, 2));
   });
 
-  // Start button
-  document.getElementById('startBtn').addEventListener('click', ()=>{
-    step=0; for(let i=0;i<answers.length;i++) answers[i]=null;
-    renderStep(); show(quizOverlay);
-  });
-
-  // close buttons
-  document.getElementById('quizClose').addEventListener('click', ()=> hide(quizOverlay));
-  document.getElementById('controlClose').addEventListener('click', ()=> hide(controlOverlay));
-  document.getElementById('resultsClose').addEventListener('click', ()=> hide(resultsOverlay));
-
-  // quiz init
+  // Wire control confirm + initial quiz render
   renderStep();
-
-  // control confirm already wired above
 })();
 </script>
 </body>

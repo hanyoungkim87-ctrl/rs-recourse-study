@@ -1,12 +1,8 @@
-# RS Transparency Demo (Modal Flow · Text-only) — Recourse Preview Version
+# RS Transparency Demo — Copy/UX refined preview recourse
 
-This version implements **recourse Step 2 as a mandatory preview**:
-- Step 1: Remove reason (acknowledgement + reason-line changes to Removed)
-- Step 2: Show alternative (preview) (acknowledgement + preview card appears)
-- Then user must choose:
-  - Keep current recommendation, or
-  - Replace with alternative (visible change on the main list)
-
-GitHub Pages:
-Upload `index.html`, `app.html`, `README.md` to repo root and enable Pages:
-Settings → Pages → Deploy from branch → main / (root)
+Tweaks vs prior:
+- Less awkward copy:
+  - Step 1: 'Contest a reason' / acknowledgement wording
+  - Step 2: 'Show one alternative' / 'Keep current' vs 'Switch to alternative'
+- Reason line uses a clear quiz attribute label and becomes 'removed at your request'
+- After decision, a short status line appears and (if switched) the changed card flashes briefly
