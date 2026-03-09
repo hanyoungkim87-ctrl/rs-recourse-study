@@ -1,23 +1,21 @@
-# RS Transparency Demo (Modal Flow)
+# RS Transparency Demo (Modal Flow · Text-only · Best Recourse)
 
-This is a **text-only** GitHub Pages demo that preserves the original flow:
-**Landing → 5-question quiz (modal) → (Control slider modal for B/D) → Recommendations (modal).**
+Flow (Wix-like):
+Landing → 5-question quiz modal → (Control slider modal for B/D) → recommendations modal.
 
-## Conditions
-A = Explanation-only (no control, no recourse)  
-B = Explanation + Control (slider)  
-C = Explanation + Recourse (Remove this reason)  
-D = Explanation + Control + Recourse  
+## Conditions (2×2)
+A = Explanation-only  
+B = Explanation + Control (slider modal)  
+C = Explanation + Recourse (two-step)  
+D = Explanation + Control + Recourse (two-step)
 
-Control × Recourse is a 2×2 factorial on the results page options.
+## Two-step Recourse (C/D)
+Step 1 (Voice/Contest): Remove this reason  
+- Shows acknowledgement + updates reason line to (Removed)
 
-## Run locally
-Open `index.html` in your browser.
+Step 2 (Repair): Hide item / Show an alternative  
+- Shows acknowledgement + replaces one recommendation with an Alternative (visible change)
 
 ## GitHub Pages
-Upload these files to the repo root and enable Pages:
-Settings → Pages → Deploy from a branch → main / (root)
-
-## Direct links
-`app.html?product=wine&cond=C`  
-`app.html?product=usb&cond=D`
+Upload `index.html`, `app.html`, `README.md` to repo root and enable Pages:
+Settings → Pages → Deploy from branch → main / (root)
