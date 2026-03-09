@@ -357,6 +357,11 @@
   }
 
   // Toast helpers
+  function clearActionToasts(){
+    $('toastOk').classList.remove('show','fade'); $('toastOk').textContent='';
+    $('toastInfo').classList.remove('show','fade'); $('toastInfo').textContent='';
+  }
+
   function setToast(el, msg){
     el.classList.remove('fade');
     el.textContent = msg;
@@ -401,51 +406,90 @@
   $('reasonYes').addEventListener('click', ()=>{
     if(!hasRecourse || reasonAnswered) return;
     reasonAnswered = true;
+
     $('reasonYes').disabled = true;
     $('reasonNo').disabled = true;
+    clearActionToasts();
+
     $('reasonState').style.display = 'inline-block';
     $('reasonState').textContent = 'Confirmed';
+
     setToast($('toastOk'), 'Thanks—confirmed. We will keep using this signal.');
+
     $('hideBtn').disabled = false;
     $('finishBtn').disabled = true; // still require hide for exposure
   });
 
+
+
   $('reasonNo').addEventListener('click', ()=>{
     if(!hasRecourse || reasonAnswered) return;
     reasonAnswered = true;
+
+    // Lock choice + clear any previous messages
     $('reasonYes').disabled = true;
     $('reasonNo').disabled = true;
+    clearActionToasts();
+
+    // Mark the reason as contested immediately (but do NOT claim it's applied yet)
     $('reasonState').style.display = 'inline-block';
-    $('reasonState').textContent = 'Removed';
+    $('reasonState').textContent = 'Contested';
+
+    // Show progress first
     $('loader').classList.add('show');
+    setToast($('toastInfo'), 'Reviewing your feedback…');
+
+    // Then apply and refresh (visible change first, acknowledgement after)
     setTimeout(()=>{
-      $('loader').classList.remove('show');
       // refresh: swap first two + badge on new top
       const tmp = items[0]; items[0]=items[1]; items[1]=tmp;
       items[0].badge = 'Updated after your correction';
       items[0].badgeType = 'info';
       renderCards(0);
-      setToast($('toastOk'), 'Applied. We removed that signal and refreshed your recommendations.');
+
+      $('loader').classList.remove('show');
+      $('reasonState').textContent = 'Removed';
+
+      // Slight delay so the change is seen before the “Applied” acknowledgement
+      setTimeout(()=>{
+        clearActionToasts();
+        setToast($('toastOk'), 'Applied. We removed that signal and refreshed your recommendations.');
+      }, 200);
+
       $('hideBtn').disabled = false;
       $('finishBtn').disabled = true; // still require hide
     }, 900);
   });
+
+
 
   // Recourse repair
   $('hideBtn').addEventListener('click', ()=>{
     if(!hasRecourse || hideUsed || !reasonAnswered) return;
     hideUsed = true;
     $('hideBtn').disabled = true;
+
+    clearActionToasts();
     $('loader').classList.add('show');
+    setToast($('toastInfo'), 'Finding an alternative…');
+
     setTimeout(()=>{
-      $('loader').classList.remove('show');
       const replacement = (product==='usb') ? altUSB2 : altWine2;
       items[2] = JSON.parse(JSON.stringify(replacement));
       renderCards(2);
-      setToast($('toastInfo'), 'Applied. We replaced one item with an alternative.');
+
+      $('loader').classList.remove('show');
+
+      setTimeout(()=>{
+        clearActionToasts();
+        setToast($('toastInfo'), 'Applied. We replaced one item with an alternative.');
+      }, 200);
+
       $('finishBtn').disabled = false;
     }, 850);
   });
+
+
 
   // Restart/Finish
   $('restartBtn').addEventListener('click', ()=>{

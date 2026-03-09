@@ -11,3 +11,6 @@ Exposure:
 - In recourse conditions, **Finish is gated** until Step 1 and Step 2 are completed.
 
 Upload `index.html`, `app.html`, `README.md` to repo root for GitHub Pages.
+
+
+v5.1 hotfix: “Applied” acknowledgement now appears AFTER the visible change (with a short progress message first).
