@@ -3,7 +3,10 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>RS Transparency Demo (Wine/USB × A–D) — v5.5</title>
+  <title>RS Transparency Demo (Wine/USB × A–D) · v6.0</title>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
   <style>
     body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;margin:0;background:#fafafa;color:#111}
     .wrap{max-width:980px;margin:40px auto;padding:0 20px}
@@ -16,33 +19,36 @@
     a:hover{background:#ececec}
     .small{font-size:12px;color:#666;margin-top:16px;line-height:1.45}
     code{background:#f1f1f1;padding:2px 6px;border-radius:6px}
+    .badge{display:inline-block;font-size:12px;background:#eef4ff;border:1px solid #d8e6ff;color:#2b4c8a;border-radius:999px;padding:4px 8px;margin-left:8px;vertical-align:middle}
   </style>
 </head>
 <body>
   <div class="wrap">
-    <h1>RS Transparency Demo (Modal Flow · Text-only) — v5.5</h1>
+    <h1>RS Transparency Demo (Modal Flow · Text-only) <span class="badge">v6.0</span></h1>
     <p>
       Flow: landing → 5-question quiz modal → (Control slider modal for B/D) → recommendations modal.<br/>
-      Recourse (C/D): confirm vs contest a stated reason → system refreshes the list → hide one item to see an alternative.
+      Recourse (C/D): confirm vs contest a <b>specific reason</b> → system refreshes the list → hide one item to see an alternative.
     </p>
+
     <div class="grid">
       <div class="card">
         <h2>Wine</h2>
-        <a href="app.html?product=wine&cond=A">Wine A — Explanation-only</a>
-        <a href="app.html?product=wine&cond=B">Wine B — Explanation + Control</a>
-        <a href="app.html?product=wine&cond=C">Wine C — Explanation + Recourse</a>
-        <a href="app.html?product=wine&cond=D">Wine D — Explanation + Control + Recourse</a>
+        <a href="app.html?product=wine&cond=A&v=6">Wine A — Explanation-only</a>
+        <a href="app.html?product=wine&cond=B&v=6">Wine B — Explanation + Control</a>
+        <a href="app.html?product=wine&cond=C&v=6">Wine C — Explanation + Recourse</a>
+        <a href="app.html?product=wine&cond=D&v=6">Wine D — Explanation + Control + Recourse</a>
       </div>
       <div class="card">
         <h2>USB</h2>
-        <a href="app.html?product=usb&cond=A">USB A — Explanation-only</a>
-        <a href="app.html?product=usb&cond=B">USB B — Explanation + Control</a>
-        <a href="app.html?product=usb&cond=C">USB C — Explanation + Recourse</a>
-        <a href="app.html?product=usb&cond=D">USB D — Explanation + Control + Recourse</a>
+        <a href="app.html?product=usb&cond=A&v=6">USB A — Explanation-only</a>
+        <a href="app.html?product=usb&cond=B&v=6">USB B — Explanation + Control</a>
+        <a href="app.html?product=usb&cond=C&v=6">USB C — Explanation + Recourse</a>
+        <a href="app.html?product=usb&cond=D&v=6">USB D — Explanation + Control + Recourse</a>
       </div>
     </div>
+
     <div class="small">
-      <b>Design:</b> Results-page options are 2×2: Control(steering) × Recourse(voice/repair). Example: <code>app.html?product=wine&cond=C</code>
+      <b>Design:</b> Results-page options are 2×2: Control(steering) × Recourse(voice/repair). Example: <code>app.html?product=wine&cond=C&v=6</code>
     </div>
   </div>
 </body>

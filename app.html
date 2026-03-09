@@ -2,10 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  \1  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Recommender Demo · v6.0</title>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-<title>Recommender Demo · v5.5</title>
   <style>
     :root{
       --bg:#f7f3ea; --ink:#1a1a1a; --muted:#5a5a5a;
@@ -21,6 +22,9 @@
     .heroCard{width:min(980px, 100%);background:var(--card);border:1px solid var(--border);border-radius:22px;box-shadow:var(--shadow);overflow:hidden;}
     .heroTop{padding:28px 28px 14px}
     .tag{display:inline-block;font-size:12px;color:#444;background:#f3efe7;border:1px solid var(--border);border-radius:999px;padding:6px 10px}
+    .badge{display:inline-block;font-size:12px;border:1px solid var(--border);border-radius:999px;padding:4px 8px;margin-left:8px;color:#444;background:#f3efe7;vertical-align:middle}
+    .badge.ok{background:var(--okbg);border-color:var(--okbd);color:var(--ok)}
+    .badge.info{background:var(--infobg);border-color:var(--infobd);color:var(--info)}
     h1{margin:14px 0 6px;font-size:46px;letter-spacing:.2px}
     .sub{margin:0;color:var(--muted);font-size:16px}
     .heroBottom{padding:0 28px 28px;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
@@ -54,15 +58,6 @@
     .explainBox{border:1px solid var(--border);border-radius:14px;padding:16px;background:#fbfaf8;font-size:18px;line-height:1.45}
     .keyLine{margin-top:10px;font-size:16px;color:#333}
     .keyLine .qLabel{color:#444}
-    .badge{display:inline-block;font-size:12px;border:1px solid var(--border);border-radius:999px;padding:4px 8px;margin-left:8px;color:#444;background:#f3efe7;vertical-align:middle}
-    .badge.ok{background:var(--okbg);border-color:var(--okbd);color:var(--ok)}
-    .badge.info{background:var(--infobg);border-color:var(--infobd);color:var(--info)}
-
-    .toast{display:none;margin-top:10px;border-radius:12px;padding:10px 12px;font-size:14px}
-    .toast.show{display:block}
-    .toast.ok{background:var(--okbg);border:1px solid var(--okbd);color:var(--ok)}
-    .toast.info{background:var(--infobg);border:1px solid var(--infobd);color:var(--info)}
-    .toast.fade{opacity:0;transition:opacity .35s ease}
 
     .recourse{margin-top:14px}
     .recTitle{font-weight:750;margin:0 0 8px}
@@ -71,8 +66,14 @@
     .recBtn:hover{background:#f6f3ee}
     .recBtn:disabled{opacity:.45;cursor:not-allowed}
 
-    .loader{display:none;margin-top:10px;font-size:14px;color:#333;background:#fff;border:1px solid var(--border);border-radius:12px;padding:10px 12px}
-    .loader.show{display:block}
+    .statusBox{display:none;margin-top:10px;font-size:14px;color:#333;background:#fff;border:1px solid var(--border);border-radius:12px;padding:10px 12px}
+    .statusBox.show{display:block}
+
+    .toast{display:none;margin-top:10px;border-radius:12px;padding:10px 12px;font-size:14px}
+    .toast.show{display:block}
+    .toast.ok{background:var(--okbg);border:1px solid var(--okbd);color:var(--ok)}
+    .toast.info{background:var(--infobg);border:1px solid var(--infobd);color:var(--info)}
+    .toast.fade{opacity:0;transition:opacity .35s ease}
 
     .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-top:16px}
     .pCard{border:1px solid var(--border);border-radius:14px;padding:14px;background:#fff;position:relative}
@@ -82,6 +83,13 @@
     li{margin:6px 0}
 
     .note{margin-top:14px;color:#9b2c44;font-size:14px;letter-spacing:.18em}
+
+    @media (max-width:520px){
+      h1{font-size:34px}
+      .modalTitle{font-size:30px}
+      .q{font-size:26px}
+      .rangeLabels{letter-spacing:.08em}
+    }
   </style>
 </head>
 <body>
@@ -89,12 +97,13 @@
     <div class="heroCard">
       <div class="heroTop">
         <span class="tag" id="contextTag">Demo</span>
+        <span class="badge info">v6.0</span>
         <h1 id="heroTitle">Recommender</h1>
         <p class="sub" id="heroSub">Discover recommendations based on a short quiz.</p>
       </div>
       <div class="heroBottom">
         <div class="meta">
-          <span class="pill">Flow: landing → 5-question quiz modal → (Control slider modal for B/D) → recommendations modal</span>
+          <span class="pill">Flow: landing → 5-question quiz → (Control slider for B/D) → results</span>
           <span class="pill" id="condPill">Condition</span>
         </div>
         <div style="display:flex;gap:10px;flex-wrap:wrap">
@@ -133,8 +142,8 @@
           <div class="condBadge">Confirm</div>
         </div>
         <div class="explainBox">
-          <b>Our system uses 50% of your inputs and 50% of product details with user feedback</b> to generate the recommendations for you.
-          <span style="color:var(--accent2);font-weight:650">You can adjust the balance using the slider below to customize your results.</span>
+          <b>Our system uses your inputs and product details</b> to generate recommendations.
+          <span style="color:var(--accent2);font-weight:650">Adjust the balance, then confirm.</span>
         </div>
         <div class="sliderRow">
           <input type="range" min="0" max="100" value="50" id="balanceSlider" />
@@ -156,7 +165,7 @@
       <div class="modalInner">
         <div class="topLine">
           <div class="modalTitle" id="resultsTitle">Recommendations</div>
-          <div class="condBadge" id="resultsCondBadge">Condition</div>
+          <div class="condBadge" id="resultsCondBadge">Cond</div>
         </div>
 
         <div class="explainBox">
@@ -169,15 +178,14 @@
             <span class="badge ok" id="reasonState" style="display:none;"></span>
           </div>
 
-          <div class="recourse" id="recourse">
+          <div class="recourse" id="recourseBlock">
             <div class="recTitle">Does this reason fit you?</div>
             <div class="row">
               <button class="recBtn" id="reasonYes">Yes, that sounds right</button>
               <button class="recBtn" id="reasonNo">No, that's not right</button>
             </div>
 
-            <div class="loader" id="loader">Updating your recommendations…</div>
-            <div class="loader" id="statusLine">Working…</div>
+            <div class="statusBox" id="statusBox">Working…</div>
 
             <div class="recTitle" style="margin-top:14px">Want to remove one option?</div>
             <div class="row">
@@ -202,19 +210,23 @@
 
 <script>
 (() => {
-  const $ = (id)=>document.getElementById(id);
+  const VERSION = "v6.0";
+  const $ = (id) => document.getElementById(id);
+
+  // URL params
   const params = new URLSearchParams(location.search);
   const product = (params.get('product') || 'wine').toLowerCase();
   const cond = (params.get('cond') || 'A').toUpperCase();
   const hasControl = (cond === 'B' || cond === 'D');
   const hasRecourse = (cond === 'C' || cond === 'D');
 
-  // Landing
+  // Landing labels
   $('contextTag').textContent = (product === 'usb') ? 'USB Match' : 'Wine Match';
   $('heroTitle').textContent  = (product === 'usb') ? 'USB Match' : 'Wine Match';
   $('heroSub').textContent    = (product === 'usb') ? 'Find a USB drive that fits your needs.' : 'Discover your perfect wine pairing.';
-  $('condPill').textContent   = `Condition ${cond} — ${(hasControl?'Control ':'')}${(hasRecourse?'Recourse':'') || 'Explanation-only'}`;
-  $('resultsCondBadge').textContent = `Cond ${cond} (Control ${hasControl?'ON':'OFF'}, Recourse ${hasRecourse?'ON':'OFF'}) · v5.5`;
+  $('condPill').textContent   = `Condition ${cond} — ${hasControl?'Control ':''}${hasRecourse?'Recourse':''}${(!hasControl && !hasRecourse)?'Explanation-only':''} · ${VERSION}`;
+  $('resultsCondBadge').textContent = `Cond ${cond} (Control ${hasControl?'ON':'OFF'}, Recourse ${hasRecourse?'ON':'OFF'}) · ${VERSION}`;
+
   $('backBtn').addEventListener('click', ()=> location.href='index.html');
 
   // Overlays
@@ -230,14 +242,14 @@
     {type:'slider', q:'Will you be sharing with friends, or is it just for you?', left:'With friends', right:'Myself'},
     {type:'slider', q:'Do you like wines that feel playful or refined?', left:'Playful', right:'Refined'},
     {type:'slider', q:'Are you planning to pair it with food or enjoy it on its own?', left:'With food', right:'On its own'},
-    {type:'slider', q:'Are you looking for something refreshing or something cozy?', left:'Refreshing', right:'Cozy'}
+    {type:'slider', q:'Are you looking for something refreshing or something cozy?', left:'Refreshing', right:'Cozy'},
   ];
   const usbQuestions = [
     {type:'choice', q:'What will you mainly use a USB drive for?', options:['Work files','Photos & videos','School','Mixed/General use']},
     {type:'slider', q:'Do you prefer something compact or something rugged?', left:'Compact', right:'Rugged'},
     {type:'slider', q:'How important is transfer speed to you?', left:'Not important', right:'Very important'},
     {type:'slider', q:'Do you prioritize capacity or portability?', left:'Portability', right:'Capacity'},
-    {type:'slider', q:'Do you prefer something minimal or something premium?', left:'Minimal', right:'Premium'}
+    {type:'slider', q:'Do you prefer something minimal or something premium?', left:'Minimal', right:'Premium'},
   ];
   const questions = (product === 'usb') ? usbQuestions : wineQuestions;
   $('quizTitle').textContent = (product === 'usb') ? 'USB Finder Quiz' : 'Wine Pairing Quiz';
@@ -272,12 +284,11 @@
       });
       area.appendChild(wrap);
     } else {
+      if(answers[step] === null) answers[step] = 50;
       const row = document.createElement('div');
       row.className = 'sliderRow';
       const input = document.createElement('input');
-      input.type='range'; input.min='0'; input.max='100';
-      if(answers[step] === null) answers[step] = 50;
-      input.value = answers[step];
+      input.type='range'; input.min='0'; input.max='100'; input.value = answers[step];
       input.addEventListener('input', ()=>{ answers[step]=Number(input.value); });
       const labels = document.createElement('div');
       labels.className='rangeLabels';
@@ -295,7 +306,6 @@
       return;
     }
     if(step < questions.length - 1){ step++; renderStep(); return; }
-    // finish quiz
     hide(quizOverlay);
     if(hasControl) show(controlOverlay);
     else showResults();
@@ -310,33 +320,44 @@
   $('controlClose').addEventListener('click', ()=> hide(controlOverlay));
   $('resultsClose').addEventListener('click', ()=> hide(resultsOverlay));
 
-  $('controlConfirm').addEventListener('click', ()=>{
-    hide(controlOverlay);
-    showResults();
-  });
-
-  // Results state
+  // Results data
   const baseWine = [
     {name:'Harmony Red Blend', bullets:['Description: A balanced red blend with ripe berries and a touch of spice.','Style: Smooth and approachable; versatile for many occasions.','Experience: Medium-bodied; great for casual sipping or dinners.']},
     {name:'Radiance White & Rosé Collection', bullets:['Description: Crisp citrus and soft floral notes with gentle richness.','Style: Light and refreshing; ideal for relaxed evenings.','Experience: Easy-to-drink; pairs nicely with seafood or desserts.']},
-    {name:'Velvet Sparkling Wine', bullets:['Description: Lively and refreshing with a smooth finish.','Style: Bright and approachable; perfect for celebrations.','Experience: Enjoyable on its own or with light meals.']}
+    {name:'Velvet Sparkling Wine', bullets:['Description: Lively and refreshing with a smooth finish.','Style: Bright and approachable; perfect for celebrations.','Experience: Enjoyable on its own or with light meals.']},
   ];
   const baseUSB = [
     {name:'Streamline USB Drive', bullets:['Description: A reliable, everyday option for documents and backups.','Style: Simple, durable design for daily use.','Experience: Plug-and-play; easy to carry.']},
     {name:'BoostSpeed USB Drive', bullets:['Description: A performance-focused option for faster transfers.','Style: Modern, compact profile.','Experience: Good for moving large files.']},
-    {name:'VaultGuard USB Drive', bullets:['Description: A security-oriented option for sensitive files.','Style: Professional look and feel.','Experience: Designed for peace of mind.']}
+    {name:'VaultGuard USB Drive', bullets:['Description: A security-oriented option for sensitive files.','Style: Professional look and feel.','Experience: Designed for peace of mind.']},
   ];
-  const altWine1 = {name:'Citrus Breeze White', bullets:['Description: Suggested after your correction to better match your preference.','Style: Bright and easy-going.','Experience: Great for casual sipping and light foods.'], badge:'Updated after your correction', badgeType:'info'};
-  const altUSB1  = {name:'FlexFit USB Drive', bullets:['Description: Suggested after your correction to better match your needs.','Style: Lightweight and versatile.','Experience: A good all-purpose choice.'], badge:'Updated after your correction', badgeType:'info'};
 
-  const altWine2 = {name:'Cozy Orchard Rosé', bullets:['Description: An alternative option suggested after you hid an item.','Style: Soft and comforting; gentle fruit notes.','Experience: Easy to enjoy in relaxed settings.'], badge:'Updated after your feedback', badgeType:'ok'};
-  const altUSB2  = {name:'PocketPro USB Drive', bullets:['Description: An alternative option suggested after you hid an item.','Style: Compact and minimal.','Experience: Convenient for everyday carry.'], badge:'Updated after your feedback', badgeType:'ok'};
+  // Alternatives
+  const altWineTop = {name:'Citrus Breeze White', bullets:['Description: Suggested after your correction to better match your preference.','Style: Bright and easy-going.','Experience: Great for casual sipping and light foods.'], badge:'Updated after your correction', badgeType:'info'};
+  const altUSBTop  = {name:'FlexFit USB Drive', bullets:['Description: Suggested after your correction to better match your needs.','Style: Lightweight and versatile.','Experience: A good all-purpose choice.'], badge:'Updated after your correction', badgeType:'info'};
+
+  const altWineHide = {name:'Cozy Orchard Rosé', bullets:['Description: An alternative option suggested after you hid an item.','Style: Soft and comforting; gentle fruit notes.','Experience: Easy to enjoy in relaxed settings.'], badge:'Updated after your feedback', badgeType:'ok'};
+  const altUSBHide  = {name:'PocketPro USB Drive', bullets:['Description: An alternative option suggested after you hid an item.','Style: Compact and minimal.','Experience: Convenient for everyday carry.'], badge:'Updated after your feedback', badgeType:'ok'};
 
   let items = [];
   let reasonAnswered = false;
   let hideUsed = false;
 
-  const cardsEl = $('cards');
+  function renderCards(flashIndex=null){
+    const cards = $('cards');
+    cards.innerHTML = '';
+    items.forEach((it, idx)=>{
+      const c = document.createElement('div');
+      c.className = 'pCard' + ((flashIndex===idx)?' flash':'');
+      const badgeClass = it.badgeType === 'ok' ? 'badge ok' : (it.badgeType === 'info' ? 'badge info' : 'badge');
+      const badge = it.badge ? `<span class="${badgeClass}">${it.badge}</span>` : '';
+      c.innerHTML = `<div class="pName">${it.name} ${badge}</div><ul>${it.bullets.map(b=>`<li>${b}</li>`).join('')}</ul>`;
+      cards.appendChild(c);
+      if(flashIndex===idx) setTimeout(()=>c.classList.remove('flash'), 950);
+    });
+    updateHideLabel();
+  }
+
   function updateHideLabel(){
     if(!hasRecourse) return;
     const btn = $('hideBtn');
@@ -345,18 +366,23 @@
     btn.textContent = `Hide “${target}” and show an alternative`;
   }
 
-  function renderCards(flashIndex=null){
-    cardsEl.innerHTML = '';
-    items.forEach((it, idx)=>{
-      const c = document.createElement('div');
-      c.className = 'pCard' + ((flashIndex===idx)?' flash':'');
-      const badgeClass = it.badgeType === 'ok' ? 'badge ok' : (it.badgeType === 'info' ? 'badge info' : 'badge');
-      const badge = it.badge ? `<span class="${badgeClass}">${it.badge}</span>` : '';
-      c.innerHTML = `<div class="pName">${it.name} ${badge}</div><ul>${it.bullets.map(b=>`<li>${b}</li>`).join('')}</ul>`;
-      cardsEl.appendChild(c);
-      if(flashIndex===idx){ setTimeout(()=>c.classList.remove('flash'), 950); }
-    });
-    updateHideLabel();
+  function setStatus(on, msg){
+    const box = $('statusBox');
+    if(msg) box.textContent = msg;
+    if(on) box.classList.add('show'); else box.classList.remove('show');
+  }
+
+  function clearToasts(){
+    $('toastOk').classList.remove('show','fade'); $('toastOk').textContent='';
+    $('toastInfo').classList.remove('show','fade'); $('toastInfo').textContent='';
+  }
+
+  function toast(el, msg){
+    el.classList.remove('fade');
+    el.textContent = msg;
+    el.classList.add('show');
+    setTimeout(()=>el.classList.add('fade'), 2400);
+    setTimeout(()=>{ el.classList.remove('show'); el.classList.remove('fade'); }, 2900);
   }
 
   function keySignalText(){
@@ -367,217 +393,133 @@
     } else {
       const v = Number(answers[4] ?? 50);
       const label = (v >= 55) ? 'more cozy than refreshing' : (v <= 45 ? 'more refreshing than cozy' : 'slightly in-between');
-      // show anchors explicitly so it feels concrete
       return `“You leaned ${label}” (${v}/100 on refreshing↔cozy, from Q: refreshing vs cozy)`;
     }
   }
 
-  // Toast helpers
-  function clearActionToasts(){
-    $('toastOk').classList.remove('show','fade'); $('toastOk').textContent='';
-    $('toastInfo').classList.remove('show','fade'); $('toastInfo').textContent='';
-  function setLoader(isOn, msg){
-    const el = $('loader');
-    const st = $('statusLine');
-    if(msg){
-      el.textContent = msg;
-      if(st) st.textContent = msg;
-    }
-    if(isOn){
-      el.classList.add('show');
-      if(st) st.classList.add('show');
-    } else {
-      el.classList.remove('show');
-      if(st) st.classList.remove('show');
-    }
-  }
+  function resetResults(){
+    items = JSON.parse(JSON.stringify((product==='usb')?baseUSB:baseWine));
+    renderCards();
 
-  }
-
-  function setToast(el, msg){
-    el.classList.remove('fade');
-    el.textContent = msg;
-    el.classList.add('show');
-    setTimeout(()=>{ el.classList.add('fade'); }, 2400);
-    setTimeout(()=>{ el.classList.remove('show'); el.classList.remove('fade'); }, 2900);
-  }
-
-  function resetRecourseUI(){
     reasonAnswered = false;
     hideUsed = false;
+
     $('reasonYes').disabled = false;
-    $('reasonNo').disabled = false;
+    $('reasonNo').disabled  = false;
+
     $('hideBtn').disabled = true;
-    $('loader').classList.remove('show');
+
     $('reasonState').style.display = 'none';
     $('reasonState').textContent = '';
-    $('toastOk').classList.remove('show','fade'); $('toastOk').textContent='';
-    $('toastInfo').classList.remove('show','fade'); $('toastInfo').textContent='';
-    $('finishBtn').disabled = hasRecourse; // gate in recourse
+
+    setStatus(false, '');
+    clearToasts();
+
+    $('finishBtn').disabled = hasRecourse; // gate for recourse
+    if(!hasRecourse) $('finishBtn').disabled = false;
   }
 
   function showResults(){
-    $('resultsTitle').textContent = ((product === 'usb') ? 'USB Recommendations' : 'Wine Recommendations') + '  ·  v5.5';
+    $('resultsTitle').textContent = ((product === 'usb') ? 'USB Recommendations' : 'Wine Recommendations') + ` · v6.0`;
     $('explainLine').textContent = hasControl
       ? `Our system uses ${Number($('balanceSlider').value)}% of your inputs and ${100-Number($('balanceSlider').value)}% of product details with user feedback to generate the recommendations for you.`
       : 'Our system uses 50% of your inputs and 50% of product details with user feedback to generate the recommendations for you.';
+
     $('keySignal').textContent = keySignalText();
+    $('recourseBlock').style.display = hasRecourse ? 'block' : 'none';
 
-    $('recourse').style.display = hasRecourse ? 'block' : 'none';
-
-    items = JSON.parse(JSON.stringify((product==='usb')?baseUSB:baseWine));
-    renderCards();
-    resetRecourseUI();
-
-    if(!hasRecourse) $('finishBtn').disabled = false;
-
+    resetResults();
     show(resultsOverlay);
   }
 
-  // Recourse voice
+  $('controlConfirm').addEventListener('click', ()=>{ hide(controlOverlay); showResults(); });
+
+  // Recourse: voice
   $('reasonYes').addEventListener('click', ()=>{
     if(!hasRecourse || reasonAnswered) return;
     reasonAnswered = true;
 
-    clearActionToasts();
-    setLoader(false, '');
+    clearToasts();
+    $('finishBtn').disabled = true;
 
-    // Lock only the reason choice buttons
+    // Lock only yes/no
     $('reasonYes').disabled = true;
     $('reasonNo').disabled  = true;
-
-    $('finishBtn').disabled = true; // still gated until repair step
 
     $('reasonState').style.display = 'inline-block';
     $('reasonState').textContent = 'Confirmed';
 
-    // Give a clear “something happened” signal (without disabling the whole panel)
-    setLoader(true, 'Saved. Reason confirmed.');
-    setTimeout(()=>{ setLoader(false, ''); }, 700);
+    setStatus(true, 'Saved. Reason confirmed.');
+    setTimeout(()=>setStatus(false,''), 700);
 
-    setToast($('toastOk'), 'Thanks—confirmed. We will keep using this signal.');
+    toast($('toastOk'), 'Thanks—confirmed. We will keep using this signal.');
 
-    // Step 2 becomes available
     $('hideBtn').disabled = false;
   });
-
-
-
-
-
-
-
-
 
   $('reasonNo').addEventListener('click', ()=>{
     if(!hasRecourse || reasonAnswered) return;
     reasonAnswered = true;
 
-    clearActionToasts();
+    clearToasts();
+    $('finishBtn').disabled = true;
 
-    // Lock only the reason choice buttons (NOT the whole panel)
     $('reasonYes').disabled = true;
     $('reasonNo').disabled  = true;
-
-    $('finishBtn').disabled = true; // keep gated until repair step
 
     $('reasonState').style.display = 'inline-block';
     $('reasonState').textContent = 'Under review';
 
-    // Make progress obvious
     const originalNoText = $('reasonNo').textContent;
     $('reasonNo').textContent = 'Updating…';
-    setLoader(true, 'Reviewing your feedback and refreshing recommendations…');
+    setStatus(true, 'Reviewing your feedback and refreshing recommendations…');
 
     setTimeout(()=>{
-      // Visible refresh: replace TOP recommendation with an alternative (very obvious change)
-      const replacementTop = (product==='usb') ? altUSB1 : altWine1;
-      items[0] = JSON.parse(JSON.stringify(replacementTop));
+      // Very obvious refresh: replace TOP item
+      const rep = (product==='usb') ? altUSBTop : altWineTop;
+      items[0] = JSON.parse(JSON.stringify(rep));
       renderCards(0);
 
-      // After paint, acknowledge
-      requestAnimationFrame(()=>{
-        requestAnimationFrame(()=>{
-          $('reasonState').textContent = 'Removed';
-          $('keySignal').textContent = $('keySignal').textContent + ' (removed at your request)';
+      requestAnimationFrame(()=>requestAnimationFrame(()=>{
+        $('reasonState').textContent = 'Removed';
+        $('keySignal').textContent = $('keySignal').textContent + ' (removed at your request)';
 
-          $('reasonNo').textContent = originalNoText;
-          setLoader(false, '');
+        $('reasonNo').textContent = originalNoText;
+        setStatus(false, '');
 
-          setToast($('toastOk'), 'Applied. We removed that signal and refreshed your recommendations.');
+        toast($('toastOk'), 'Applied. We removed that signal and refreshed your recommendations.');
 
-          // Step 2 becomes available
-          $('hideBtn').disabled = false;
-        });
-      });
+        $('hideBtn').disabled = false;
+      }));
     }, 900);
   });
 
-
-      });
-
-      $('hideBtn').disabled = false;
-      $('finishBtn').disabled = true; // still require hide
-    }, 900);
-  });
-
-
-      });
-
-      $('hideBtn').disabled = false;
-      $('finishBtn').disabled = true; // still require hide
-    }, 900);
-  });
-
-
-
-
-
-  // Recourse repair
+  // Recourse: repair
   $('hideBtn').addEventListener('click', ()=>{
     if(!hasRecourse || hideUsed || !reasonAnswered) return;
     hideUsed = true;
 
-    clearActionToasts();
+    clearToasts();
     $('finishBtn').disabled = true;
 
     const original = $('hideBtn').textContent;
     $('hideBtn').disabled = true;
     $('hideBtn').textContent = 'Updating…';
-    setLoader(true, 'Finding an alternative…');
+    setStatus(true, 'Finding an alternative…');
 
     setTimeout(()=>{
-      const replacement = (product==='usb') ? altUSB2 : altWine2;
-      items[2] = JSON.parse(JSON.stringify(replacement));
+      const rep = (product==='usb') ? altUSBHide : altWineHide;
+      items[2] = JSON.parse(JSON.stringify(rep));
       renderCards(2);
 
-      requestAnimationFrame(()=>{
-        requestAnimationFrame(()=>{
-          setLoader(false, '');
-          $('hideBtn').textContent = original;
-
-          setToast($('toastInfo'), 'Applied. We replaced the hidden item with an alternative.');
-          $('finishBtn').disabled = false;
-        });
-      });
+      requestAnimationFrame(()=>requestAnimationFrame(()=>{
+        $('hideBtn').textContent = original;
+        setStatus(false, '');
+        toast($('toastInfo'), 'Applied. We replaced the hidden item with an alternative.');
+        $('finishBtn').disabled = false;
+      }));
     }, 850);
   });
-
-
-      });
-    }, 850);
-  });
-
-
-      });
-
-      $('finishBtn').disabled = false;
-    }, 850);
-  });
-
-
-
-
 
   // Restart/Finish
   $('restartBtn').addEventListener('click', ()=>{
@@ -588,6 +530,7 @@
 
   $('finishBtn').addEventListener('click', ()=>{
     const payload = {
+      version: VERSION,
       product, cond,
       control: hasControl,
       recourse: hasRecourse,
@@ -599,6 +542,12 @@
     };
     alert('Demo finished.\n\n' + JSON.stringify(payload, null, 2));
   });
+
+  // Close buttons
+  $('startBtn').addEventListener('keydown', (e)=>{ if(e.key==='Enter') $('startBtn').click(); });
+  $('resultsClose').addEventListener('click', ()=> hide(resultsOverlay));
+  $('quizClose').addEventListener('click', ()=> hide(quizOverlay));
+  $('controlClose').addEventListener('click', ()=> hide(controlOverlay));
 
   // Init
   renderStep();
