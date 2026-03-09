@@ -14,3 +14,6 @@ Upload `index.html`, `app.html`, `README.md` to repo root for GitHub Pages.
 
 
 v5.1 hotfix: “Applied” acknowledgement now appears AFTER the visible change (with a short progress message first).
+
+
+v5.2 hotfix: Loader message shown first; “Applied” appears only after the updated list is visibly repainted (double rAF).

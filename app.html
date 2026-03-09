@@ -360,6 +360,13 @@
   function clearActionToasts(){
     $('toastOk').classList.remove('show','fade'); $('toastOk').textContent='';
     $('toastInfo').classList.remove('show','fade'); $('toastInfo').textContent='';
+  function setLoader(isOn, msg){
+    const el = $('loader');
+    if(msg) el.textContent = msg;
+    if(isOn) el.classList.add('show');
+    else el.classList.remove('show');
+  }
+
   }
 
   function setToast(el, msg){
@@ -410,6 +417,7 @@
     $('reasonYes').disabled = true;
     $('reasonNo').disabled = true;
     clearActionToasts();
+    setLoader(false, '');
 
     $('reasonState').style.display = 'inline-block';
     $('reasonState').textContent = 'Confirmed';
@@ -422,6 +430,8 @@
 
 
 
+
+
   $('reasonNo').addEventListener('click', ()=>{
     if(!hasRecourse || reasonAnswered) return;
     reasonAnswered = true;
@@ -431,35 +441,37 @@
     $('reasonNo').disabled = true;
     clearActionToasts();
 
-    // Mark the reason as contested immediately (but do NOT claim it's applied yet)
+    // Mark as contested (no "Applied" yet)
     $('reasonState').style.display = 'inline-block';
     $('reasonState').textContent = 'Contested';
 
-    // Show progress first
-    $('loader').classList.add('show');
-    setToast($('toastInfo'), 'Reviewing your feedback…');
+    // Progress first
+    setLoader(true, 'Reviewing your feedback…');
 
-    // Then apply and refresh (visible change first, acknowledgement after)
+    // Apply update
     setTimeout(()=>{
-      // refresh: swap first two + badge on new top
+      // Visible refresh: re-rank + badge on new top item
       const tmp = items[0]; items[0]=items[1]; items[1]=tmp;
       items[0].badge = 'Updated after your correction';
       items[0].badgeType = 'info';
       renderCards(0);
 
-      $('loader').classList.remove('show');
-      $('reasonState').textContent = 'Removed';
-
-      // Slight delay so the change is seen before the “Applied” acknowledgement
-      setTimeout(()=>{
-        clearActionToasts();
-        setToast($('toastOk'), 'Applied. We removed that signal and refreshed your recommendations.');
-      }, 200);
+      // Wait for browser to paint the updated list, then acknowledge
+      requestAnimationFrame(()=>{
+        requestAnimationFrame(()=>{
+          setLoader(false, '');
+          $('reasonState').textContent = 'Removed';
+          clearActionToasts();
+          setToast($('toastOk'), 'Applied. We removed that signal and refreshed your recommendations.');
+        });
+      });
 
       $('hideBtn').disabled = false;
       $('finishBtn').disabled = true; // still require hide
     }, 900);
   });
+
+
 
 
 
@@ -470,24 +482,26 @@
     $('hideBtn').disabled = true;
 
     clearActionToasts();
-    $('loader').classList.add('show');
-    setToast($('toastInfo'), 'Finding an alternative…');
+    setLoader(true, 'Finding an alternative…');
 
     setTimeout(()=>{
       const replacement = (product==='usb') ? altUSB2 : altWine2;
       items[2] = JSON.parse(JSON.stringify(replacement));
       renderCards(2);
 
-      $('loader').classList.remove('show');
-
-      setTimeout(()=>{
-        clearActionToasts();
-        setToast($('toastInfo'), 'Applied. We replaced one item with an alternative.');
-      }, 200);
+      requestAnimationFrame(()=>{
+        requestAnimationFrame(()=>{
+          setLoader(false, '');
+          clearActionToasts();
+          setToast($('toastInfo'), 'Applied. We replaced one item with an alternative.');
+        });
+      });
 
       $('finishBtn').disabled = false;
     }, 850);
   });
+
+
 
 
 
