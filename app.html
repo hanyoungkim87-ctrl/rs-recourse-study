@@ -80,13 +80,6 @@
     ul{margin:0;padding-left:18px;color:#444}
     li{margin:6px 0}
     .note{margin-top:14px;color:#9b2c44;font-size:14px;letter-spacing:.18em}
-
-    @media (max-width:520px){
-      h1{font-size:34px}
-      .modalTitle{font-size:30px}
-      .q{font-size:26px}
-      .rangeLabels{letter-spacing:.08em}
-    }
   </style>
 </head>
 <body>
@@ -110,7 +103,6 @@
     </div>
   </div>
 
-  <!-- QUIZ MODAL -->
   <div class="overlay" id="quizOverlay">
     <div class="modal" role="dialog" aria-modal="true">
       <button class="close" id="quizClose" aria-label="Close">×</button>
@@ -128,7 +120,6 @@
     </div>
   </div>
 
-  <!-- CONTROL MODAL -->
   <div class="overlay" id="controlOverlay">
     <div class="modal" role="dialog" aria-modal="true">
       <button class="close" id="controlClose" aria-label="Close">×</button>
@@ -154,7 +145,6 @@
     </div>
   </div>
 
-  <!-- RESULTS MODAL -->
   <div class="overlay" id="resultsOverlay">
     <div class="modal" role="dialog" aria-modal="true">
       <button class="close" id="resultsClose" aria-label="Close">×</button>
@@ -228,7 +218,6 @@
   const show = el => el.classList.add('show');
   const hide = el => el.classList.remove('show');
 
-  // quiz
   const quizTitle = document.getElementById('quizTitle');
   const quizProgress = document.getElementById('quizProgress');
   const quizStepArea = document.getElementById('quizStepArea');
@@ -339,7 +328,7 @@
 
   const finishBtn = document.getElementById('finishBtn');
 
-  let reasonDecision = null; // 'kept' or 'removed'
+  let reasonDecision = null;
   let altShown = false;
   let decision = null;
 
@@ -428,13 +417,12 @@
     show(resultsOverlay);
   }
 
-  // Reason decision: keep vs remove
   keepReasonBtn.addEventListener('click', ()=>{
     if(!hasRecourse) return;
     reasonDecision = 'kept';
     reasonBadge.style.display = 'inline-block';
     reasonBadge.textContent = 'Kept';
-    keySignalEl.textContent = keySignalBase; // unchanged
+    keySignalEl.textContent = keySignalBase;
     keepReasonBtn.disabled = true;
     removeReasonBtn.disabled = true;
     setToast('Saved. We will keep using this reason.');
@@ -455,6 +443,7 @@
 
   function enableFinish(){ finishBtn.disabled = false; }
 
+  // Fix: lock both buttons after selecting one
   keepBtn.addEventListener('click', ()=>{
     if(!hasRecourse || !altShown) return;
     decision = 'keep';
@@ -481,7 +470,6 @@
     useAltBtn.disabled = true;
 
     setTimeout(()=>{ preview.style.display = 'none'; }, 650);
-
     setToast('Saved. Recommendations updated.');
     enableFinish();
   });

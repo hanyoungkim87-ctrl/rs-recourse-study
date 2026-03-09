@@ -1,12 +1,11 @@
-# RS Transparency Demo — v4.1 (Keep vs Remove reason)
+# RS Transparency Demo — FINAL v4.2 (Locked buttons after choice)
 
-This version fixes the “I don't want to remove it” problem by making the reason step a forced **choice**, not a forced deletion:
+This fixes the remaining issue visible in your screenshot:
+- After choosing **Keep current**, the **Use alternative** button is now disabled too.
+- After choosing **Use alternative**, both buttons are disabled (same as before).
 
 Recourse (C/D):
-1) Reason decision: **Keep this reason** OR **Remove this reason**
-   - Shows badge: Kept / Removed
-2) Alternative preview appears (shown once)
-3) Choose Keep current vs Use alternative
+1) Keep vs Remove reason (both valid; no forced deletion)
+2) Alternative preview shown once
+3) Keep current vs Use alternative (choice locks both buttons)
 Finish is gated until the keep/use decision is made.
-
-Upload `index.html`, `app.html`, `README.md` to repo root for GitHub Pages.
