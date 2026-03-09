@@ -2,8 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Recommender Demo · v5.3</title>
+  \1  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+<title>Recommender Demo · v5.5</title>
   <style>
     :root{
       --bg:#f7f3ea; --ink:#1a1a1a; --muted:#5a5a5a;
@@ -45,7 +47,7 @@
     .footerRow{display:flex;justify-content:flex-end;gap:10px;margin-top:22px}
     .nextBtn{border:0;border-radius:999px;padding:12px 18px;background:var(--accent);color:#fff;font-weight:650;cursor:pointer}
     .nextBtn.secondary{background:#f3efe7;color:#111;border:1px solid var(--border)}
-    .nextBtn:disabled{opacity:.55;cursor:not-allowed}
+    .nextBtn:disabled{opacity:.45;cursor:not-allowed;background:#c7c0b6}
 
     .topLine{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:10px}
     .condBadge{font-size:12px;background:#f3efe7;border:1px solid var(--border);border-radius:999px;padding:6px 10px;color:#444}
@@ -67,9 +69,9 @@
     .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
     .recBtn{border:1px solid var(--border);background:#fff;border-radius:999px;padding:10px 14px;cursor:pointer;font-weight:650}
     .recBtn:hover{background:#f6f3ee}
-    .recBtn:disabled{opacity:.55;cursor:not-allowed}
+    .recBtn:disabled{opacity:.45;cursor:not-allowed}
 
-    .loader{display:none;margin-top:10px;font-size:14px;color:#555}
+    .loader{display:none;margin-top:10px;font-size:14px;color:#333;background:#fff;border:1px solid var(--border);border-radius:12px;padding:10px 12px}
     .loader.show{display:block}
 
     .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-top:16px}
@@ -175,6 +177,7 @@
             </div>
 
             <div class="loader" id="loader">Updating your recommendations…</div>
+            <div class="loader" id="statusLine">Working…</div>
 
             <div class="recTitle" style="margin-top:14px">Want to remove one option?</div>
             <div class="row">
@@ -211,7 +214,7 @@
   $('heroTitle').textContent  = (product === 'usb') ? 'USB Match' : 'Wine Match';
   $('heroSub').textContent    = (product === 'usb') ? 'Find a USB drive that fits your needs.' : 'Discover your perfect wine pairing.';
   $('condPill').textContent   = `Condition ${cond} — ${(hasControl?'Control ':'')}${(hasRecourse?'Recourse':'') || 'Explanation-only'}`;
-  $('resultsCondBadge').textContent = `Cond ${cond} (Control ${hasControl?'ON':'OFF'}, Recourse ${hasRecourse?'ON':'OFF'}) · v5.3`;
+  $('resultsCondBadge').textContent = `Cond ${cond} (Control ${hasControl?'ON':'OFF'}, Recourse ${hasRecourse?'ON':'OFF'}) · v5.5`;
   $('backBtn').addEventListener('click', ()=> location.href='index.html');
 
   // Overlays
@@ -323,6 +326,9 @@
     {name:'BoostSpeed USB Drive', bullets:['Description: A performance-focused option for faster transfers.','Style: Modern, compact profile.','Experience: Good for moving large files.']},
     {name:'VaultGuard USB Drive', bullets:['Description: A security-oriented option for sensitive files.','Style: Professional look and feel.','Experience: Designed for peace of mind.']}
   ];
+  const altWine1 = {name:'Citrus Breeze White', bullets:['Description: Suggested after your correction to better match your preference.','Style: Bright and easy-going.','Experience: Great for casual sipping and light foods.'], badge:'Updated after your correction', badgeType:'info'};
+  const altUSB1  = {name:'FlexFit USB Drive', bullets:['Description: Suggested after your correction to better match your needs.','Style: Lightweight and versatile.','Experience: A good all-purpose choice.'], badge:'Updated after your correction', badgeType:'info'};
+
   const altWine2 = {name:'Cozy Orchard Rosé', bullets:['Description: An alternative option suggested after you hid an item.','Style: Soft and comforting; gentle fruit notes.','Experience: Easy to enjoy in relaxed settings.'], badge:'Updated after your feedback', badgeType:'ok'};
   const altUSB2  = {name:'PocketPro USB Drive', bullets:['Description: An alternative option suggested after you hid an item.','Style: Compact and minimal.','Experience: Convenient for everyday carry.'], badge:'Updated after your feedback', badgeType:'ok'};
 
@@ -331,6 +337,14 @@
   let hideUsed = false;
 
   const cardsEl = $('cards');
+  function updateHideLabel(){
+    if(!hasRecourse) return;
+    const btn = $('hideBtn');
+    if(!btn) return;
+    const target = items[2]?.name || 'this item';
+    btn.textContent = `Hide “${target}” and show an alternative`;
+  }
+
   function renderCards(flashIndex=null){
     cardsEl.innerHTML = '';
     items.forEach((it, idx)=>{
@@ -342,6 +356,7 @@
       cardsEl.appendChild(c);
       if(flashIndex===idx){ setTimeout(()=>c.classList.remove('flash'), 950); }
     });
+    updateHideLabel();
   }
 
   function keySignalText(){
@@ -363,9 +378,18 @@
     $('toastInfo').classList.remove('show','fade'); $('toastInfo').textContent='';
   function setLoader(isOn, msg){
     const el = $('loader');
-    if(msg) el.textContent = msg;
-    if(isOn) el.classList.add('show');
-    else el.classList.remove('show');
+    const st = $('statusLine');
+    if(msg){
+      el.textContent = msg;
+      if(st) st.textContent = msg;
+    }
+    if(isOn){
+      el.classList.add('show');
+      if(st) st.classList.add('show');
+    } else {
+      el.classList.remove('show');
+      if(st) st.classList.remove('show');
+    }
   }
 
   }
@@ -393,7 +417,7 @@
   }
 
   function showResults(){
-    $('resultsTitle').textContent = (product === 'usb') ? 'USB Recommendations' : 'Wine Recommendations';
+    $('resultsTitle').textContent = ((product === 'usb') ? 'USB Recommendations' : 'Wine Recommendations') + '  ·  v5.5';
     $('explainLine').textContent = hasControl
       ? `Our system uses ${Number($('balanceSlider').value)}% of your inputs and ${100-Number($('balanceSlider').value)}% of product details with user feedback to generate the recommendations for you.`
       : 'Our system uses 50% of your inputs and 50% of product details with user feedback to generate the recommendations for you.';
@@ -415,19 +439,31 @@
     if(!hasRecourse || reasonAnswered) return;
     reasonAnswered = true;
 
-    $('reasonYes').disabled = true;
-    $('reasonNo').disabled = true;
     clearActionToasts();
     setLoader(false, '');
+
+    // Lock only the reason choice buttons
+    $('reasonYes').disabled = true;
+    $('reasonNo').disabled  = true;
+
+    $('finishBtn').disabled = true; // still gated until repair step
 
     $('reasonState').style.display = 'inline-block';
     $('reasonState').textContent = 'Confirmed';
 
+    // Give a clear “something happened” signal (without disabling the whole panel)
+    setLoader(true, 'Saved. Reason confirmed.');
+    setTimeout(()=>{ setLoader(false, ''); }, 700);
+
     setToast($('toastOk'), 'Thanks—confirmed. We will keep using this signal.');
 
+    // Step 2 becomes available
     $('hideBtn').disabled = false;
-    $('finishBtn').disabled = true; // still require hide for exposure
   });
+
+
+
+
 
 
 
@@ -437,42 +473,55 @@
     if(!hasRecourse || reasonAnswered) return;
     reasonAnswered = true;
 
-    // Lock choice + clear any previous messages
-    $('reasonYes').disabled = true;
-    $('reasonNo').disabled = true;
     clearActionToasts();
+
+    // Lock only the reason choice buttons (NOT the whole panel)
+    $('reasonYes').disabled = true;
+    $('reasonNo').disabled  = true;
 
     $('finishBtn').disabled = true; // keep gated until repair step
 
-
-    // Mark as contested (no "Applied" yet)
     $('reasonState').style.display = 'inline-block';
     $('reasonState').textContent = 'Under review';
 
-    // Progress first
-    setLoader(true, 'Reviewing your feedback…');
+    // Make progress obvious
+    const originalNoText = $('reasonNo').textContent;
+    $('reasonNo').textContent = 'Updating…';
+    setLoader(true, 'Reviewing your feedback and refreshing recommendations…');
 
-    // Apply update
     setTimeout(()=>{
-      // Visible refresh: re-rank + badge on new top item
-      const tmp = items[0]; items[0]=items[1]; items[1]=tmp;
-      items[0].badge = 'Updated after your correction';
-      items[0].badgeType = 'info';
+      // Visible refresh: replace TOP recommendation with an alternative (very obvious change)
+      const replacementTop = (product==='usb') ? altUSB1 : altWine1;
+      items[0] = JSON.parse(JSON.stringify(replacementTop));
       renderCards(0);
 
-      // Wait for browser to paint the updated list, then acknowledge
+      // After paint, acknowledge
       requestAnimationFrame(()=>{
         requestAnimationFrame(()=>{
-          setLoader(false, '');
           $('reasonState').textContent = 'Removed';
-          // reflect removal in the displayed reason
           $('keySignal').textContent = $('keySignal').textContent + ' (removed at your request)';
-          clearActionToasts();
 
-    $('finishBtn').disabled = true; // keep gated until repair step
+          $('reasonNo').textContent = originalNoText;
+          setLoader(false, '');
 
           setToast($('toastOk'), 'Applied. We removed that signal and refreshed your recommendations.');
+
+          // Step 2 becomes available
+          $('hideBtn').disabled = false;
         });
+      });
+    }, 900);
+  });
+
+
+      });
+
+      $('hideBtn').disabled = false;
+      $('finishBtn').disabled = true; // still require hide
+    }, 900);
+  });
+
+
       });
 
       $('hideBtn').disabled = false;
@@ -488,9 +537,13 @@
   $('hideBtn').addEventListener('click', ()=>{
     if(!hasRecourse || hideUsed || !reasonAnswered) return;
     hideUsed = true;
-    $('hideBtn').disabled = true;
 
     clearActionToasts();
+    $('finishBtn').disabled = true;
+
+    const original = $('hideBtn').textContent;
+    $('hideBtn').disabled = true;
+    $('hideBtn').textContent = 'Updating…';
     setLoader(true, 'Finding an alternative…');
 
     setTimeout(()=>{
@@ -501,9 +554,21 @@
       requestAnimationFrame(()=>{
         requestAnimationFrame(()=>{
           setLoader(false, '');
-          clearActionToasts();
-          setToast($('toastInfo'), 'Applied. We replaced one item with an alternative.');
+          $('hideBtn').textContent = original;
+
+          setToast($('toastInfo'), 'Applied. We replaced the hidden item with an alternative.');
+          $('finishBtn').disabled = false;
         });
+      });
+    }, 850);
+  });
+
+
+      });
+    }, 850);
+  });
+
+
       });
 
       $('finishBtn').disabled = false;

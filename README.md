@@ -25,3 +25,18 @@ v5.3: stronger recourse feel + robustness.
 - Reason state uses “Under review” before being removed.
 - After removal, key-signal line is annotated “removed at your request.”
 - Build tag shown in UI (v5.3).
+
+
+v5.4: hardening + more obvious refresh
+- Contest now replaces the TOP recommendation with a clearly different alternative (stronger visible refresh).
+- Hide button names the specific item being hidden.
+- Finish stays disabled until repair completes (and disabled styling is stronger).
+- Build watermark appears in the modal title and condition badge.
+- Added cache-control meta tags.
+
+
+v5.5: UX fix for “No disables everything”.
+- Only the Yes/No buttons are disabled during the refresh; the panel stays responsive.
+- No button text changes to “Updating…” during processing.
+- A prominent status box appears while updating.
+- Step 2 (hide & replace) unlocks after the refresh completes.
