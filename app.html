@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Recommender Demo · v6.0</title>
+  <title>Recommender Demo · v6.1</title>
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
@@ -97,7 +97,7 @@
     <div class="heroCard">
       <div class="heroTop">
         <span class="tag" id="contextTag">Demo</span>
-        <span class="badge info">v6.0</span>
+        <span class="badge info">v6.1</span>
         <h1 id="heroTitle">Recommender</h1>
         <p class="sub" id="heroSub">Discover recommendations based on a short quiz.</p>
       </div>
@@ -210,7 +210,7 @@
 
 <script>
 (() => {
-  const VERSION = "v6.0";
+  const VERSION = "v6.1";
   const $ = (id) => document.getElementById(id);
 
   // URL params
@@ -318,7 +318,7 @@
 
   $('quizClose').addEventListener('click', ()=> hide(quizOverlay));
   $('controlClose').addEventListener('click', ()=> hide(controlOverlay));
-  $('resultsClose').addEventListener('click', ()=> hide(resultsOverlay));
+  $('resultsClose').addEventListener('click', ()=>{ newSession(); hide(resultsOverlay); });
 
   // Results data
   const baseWine = [
@@ -342,6 +342,10 @@
   let items = [];
   let reasonAnswered = false;
   let hideUsed = false;
+
+  // Session token to prevent stale async callbacks from previous runs
+  let sessionToken = 0;
+  function newSession(){ sessionToken++; return sessionToken; }
 
   function renderCards(flashIndex=null){
     const cards = $('cards');
@@ -398,6 +402,8 @@
   }
 
   function resetResults(){
+    // cancel any pending async updates from previous interactions
+    newSession();
     items = JSON.parse(JSON.stringify((product==='usb')?baseUSB:baseWine));
     renderCards();
 
@@ -420,7 +426,7 @@
   }
 
   function showResults(){
-    $('resultsTitle').textContent = ((product === 'usb') ? 'USB Recommendations' : 'Wine Recommendations') + ` · v6.0`;
+    $('resultsTitle').textContent = ((product === 'usb') ? 'USB Recommendations' : 'Wine Recommendations') + ` · v6.1`;
     $('explainLine').textContent = hasControl
       ? `Our system uses ${Number($('balanceSlider').value)}% of your inputs and ${100-Number($('balanceSlider').value)}% of product details with user feedback to generate the recommendations for you.`
       : 'Our system uses 50% of your inputs and 50% of product details with user feedback to generate the recommendations for you.';
@@ -439,7 +445,10 @@
     if(!hasRecourse || reasonAnswered) return;
     reasonAnswered = true;
 
+    const token = sessionToken;
+
     clearToasts();
+    $('toastInfo').classList.remove('show','fade'); $('toastInfo').textContent='';
     $('finishBtn').disabled = true;
 
     // Lock only yes/no
@@ -461,6 +470,8 @@
     if(!hasRecourse || reasonAnswered) return;
     reasonAnswered = true;
 
+    const token = sessionToken;
+
     clearToasts();
     $('finishBtn').disabled = true;
 
@@ -475,12 +486,14 @@
     setStatus(true, 'Reviewing your feedback and refreshing recommendations…');
 
     setTimeout(()=>{
+      if(token !== sessionToken) return;
       // Very obvious refresh: replace TOP item
       const rep = (product==='usb') ? altUSBTop : altWineTop;
       items[0] = JSON.parse(JSON.stringify(rep));
       renderCards(0);
 
       requestAnimationFrame(()=>requestAnimationFrame(()=>{
+        if(token !== sessionToken) return;
         $('reasonState').textContent = 'Removed';
         $('keySignal').textContent = $('keySignal').textContent + ' (removed at your request)';
 
@@ -508,11 +521,13 @@
     setStatus(true, 'Finding an alternative…');
 
     setTimeout(()=>{
+      if(token !== sessionToken) return;
       const rep = (product==='usb') ? altUSBHide : altWineHide;
       items[2] = JSON.parse(JSON.stringify(rep));
       renderCards(2);
 
       requestAnimationFrame(()=>requestAnimationFrame(()=>{
+        if(token !== sessionToken) return;
         $('hideBtn').textContent = original;
         setStatus(false, '');
         toast($('toastInfo'), 'Applied. We replaced the hidden item with an alternative.');
@@ -523,6 +538,7 @@
 
   // Restart/Finish
   $('restartBtn').addEventListener('click', ()=>{
+    newSession();
     hide(resultsOverlay);
     step=0; for(let i=0;i<answers.length;i++) answers[i]=null;
     renderStep(); show(quizOverlay);
@@ -545,7 +561,7 @@
 
   // Close buttons
   $('startBtn').addEventListener('keydown', (e)=>{ if(e.key==='Enter') $('startBtn').click(); });
-  $('resultsClose').addEventListener('click', ()=> hide(resultsOverlay));
+  $('resultsClose').addEventListener('click', ()=>{ newSession(); hide(resultsOverlay); });
   $('quizClose').addEventListener('click', ()=> hide(quizOverlay));
   $('controlClose').addEventListener('click', ()=> hide(controlOverlay));
 

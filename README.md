@@ -1,4 +1,4 @@
-# RS Recourse Demo — v6.0 (clean rebuild)
+# RS Recourse Demo — v6.1 (clean rebuild)
 
 This is a clean rebuild after patch-chain issues.
 
@@ -13,3 +13,8 @@ Key behaviors:
 Deployment:
 Upload `index.html`, `app.html`, `README.md` to repo root and hard refresh (Cmd+Shift+R).
 Launcher links include `&v=6` for cache-busting.
+
+
+v6.1 fix:
+- Added a session token so any pending timeouts/animation-frame callbacks from earlier clicks cannot fire after a restart or a new action.
+- Prevents the “hide replacement applied” message from appearing when the user only clicked the reason contest button.
