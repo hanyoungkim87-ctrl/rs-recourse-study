@@ -8,7 +8,7 @@
     body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;margin:0;background:#fafafa;color:#111}
     .wrap{max-width:980px;margin:40px auto;padding:0 20px}
     h1{font-size:28px;margin:0 0 8px}
-    p{margin:0 0 18px;color:#333}
+    p{margin:0 0 18px;color:#333;line-height:1.4}
     .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
     .card{background:#fff;border:1px solid #e6e6e6;border-radius:14px;padding:14px}
     .card h2{font-size:16px;margin:0 0 10px}
@@ -20,29 +20,29 @@
 </head>
 <body>
   <div class="wrap">
-    <h1>RS Transparency Demo (Modal Flow · Text-only · Best Recourse)</h1>
-    <p>Flow: landing → 5-question quiz modal → (Control slider modal for B/D) → recommendations modal.<br/>
-       Recourse in C/D is <b>two-step</b>: (1) remove reason + acknowledgement + reason-line change, then (2) hide item + show an alternative.
+    <h1>RS Transparency Demo (Modal Flow · Text-only)</h1>
+    <p>
+      Flow: landing → 5-question quiz modal → (Control slider modal for B/D) → recommendations modal.<br/>
+      Recourse (C/D) uses <b>two-step</b>: Step 1 removes a reason (voice) → Step 2 shows an alternative (preview), then users choose <i>Keep</i> vs <i>Replace</i>.
     </p>
     <div class="grid">
       <div class="card">
         <h2>Wine</h2>
         <a href="app.html?product=wine&cond=A">Wine A — Explanation-only</a>
         <a href="app.html?product=wine&cond=B">Wine B — Explanation + Control</a>
-        <a href="app.html?product=wine&cond=C">Wine C — Explanation + Recourse (two-step)</a>
-        <a href="app.html?product=wine&cond=D">Wine D — Explanation + Control + Recourse (two-step)</a>
+        <a href="app.html?product=wine&cond=C">Wine C — Explanation + Recourse (preview)</a>
+        <a href="app.html?product=wine&cond=D">Wine D — Explanation + Control + Recourse (preview)</a>
       </div>
       <div class="card">
         <h2>USB</h2>
         <a href="app.html?product=usb&cond=A">USB A — Explanation-only</a>
         <a href="app.html?product=usb&cond=B">USB B — Explanation + Control</a>
-        <a href="app.html?product=usb&cond=C">USB C — Explanation + Recourse (two-step)</a>
-        <a href="app.html?product=usb&cond=D">USB D — Explanation + Control + Recourse (two-step)</a>
+        <a href="app.html?product=usb&cond=C">USB C — Explanation + Recourse (preview)</a>
+        <a href="app.html?product=usb&cond=D">USB D — Explanation + Control + Recourse (preview)</a>
       </div>
     </div>
     <div class="small">
-      <b>Design</b>: Results-page options are a 2×2 factorial: Control(steering slider) × Recourse(voice/repair).<br/>
-      <b>Direct link example</b>: <code>app.html?product=wine&cond=D</code>
+      <b>2×2:</b> Control(steering) × Recourse(voice/repair). Example: <code>app.html?product=wine&cond=C</code>
     </div>
   </div>
 </body>
