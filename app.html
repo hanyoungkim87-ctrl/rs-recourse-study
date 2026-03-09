@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Recommender Demo</title>
+  <title>Recommender Demo · v5.3</title>
   <style>
     :root{
       --bg:#f7f3ea; --ink:#1a1a1a; --muted:#5a5a5a;
@@ -211,7 +211,7 @@
   $('heroTitle').textContent  = (product === 'usb') ? 'USB Match' : 'Wine Match';
   $('heroSub').textContent    = (product === 'usb') ? 'Find a USB drive that fits your needs.' : 'Discover your perfect wine pairing.';
   $('condPill').textContent   = `Condition ${cond} — ${(hasControl?'Control ':'')}${(hasRecourse?'Recourse':'') || 'Explanation-only'}`;
-  $('resultsCondBadge').textContent = `Cond ${cond} (Control ${hasControl?'ON':'OFF'}, Recourse ${hasRecourse?'ON':'OFF'})`;
+  $('resultsCondBadge').textContent = `Cond ${cond} (Control ${hasControl?'ON':'OFF'}, Recourse ${hasRecourse?'ON':'OFF'}) · v5.3`;
   $('backBtn').addEventListener('click', ()=> location.href='index.html');
 
   // Overlays
@@ -348,11 +348,12 @@
     if(product === 'usb'){
       const v = Number(answers[2] ?? 50);
       const label = (v >= 60) ? 'very important' : (v <= 40 ? 'not important' : 'moderately important');
-      return `“You said transfer speed is ${label}” (from Q: transfer speed)`;
+      return `“You said transfer speed is ${label}” (${v}/100, from Q: transfer speed)`;
     } else {
       const v = Number(answers[4] ?? 50);
-      const label = (v >= 60) ? 'cozy' : (v <= 40 ? 'refreshing' : 'balanced');
-      return `“You said you prefer ${label} wines” (from Q: refreshing vs cozy)`;
+      const label = (v >= 55) ? 'more cozy than refreshing' : (v <= 45 ? 'more refreshing than cozy' : 'slightly in-between');
+      // show anchors explicitly so it feels concrete
+      return `“You leaned ${label}” (${v}/100 on refreshing↔cozy, from Q: refreshing vs cozy)`;
     }
   }
 
@@ -441,9 +442,12 @@
     $('reasonNo').disabled = true;
     clearActionToasts();
 
+    $('finishBtn').disabled = true; // keep gated until repair step
+
+
     // Mark as contested (no "Applied" yet)
     $('reasonState').style.display = 'inline-block';
-    $('reasonState').textContent = 'Contested';
+    $('reasonState').textContent = 'Under review';
 
     // Progress first
     setLoader(true, 'Reviewing your feedback…');
@@ -461,7 +465,12 @@
         requestAnimationFrame(()=>{
           setLoader(false, '');
           $('reasonState').textContent = 'Removed';
+          // reflect removal in the displayed reason
+          $('keySignal').textContent = $('keySignal').textContent + ' (removed at your request)';
           clearActionToasts();
+
+    $('finishBtn').disabled = true; // keep gated until repair step
+
           setToast($('toastOk'), 'Applied. We removed that signal and refreshed your recommendations.');
         });
       });

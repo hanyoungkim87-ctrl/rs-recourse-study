@@ -17,3 +17,11 @@ v5.1 hotfix: “Applied” acknowledgement now appears AFTER the visible change 
 
 
 v5.2 hotfix: Loader message shown first; “Applied” appears only after the updated list is visibly repainted (double rAF).
+
+
+v5.3: stronger recourse feel + robustness.
+- Key signal is more concrete (includes numeric slider position; avoids vague “balanced”).
+- Finish is explicitly gated (disabled) immediately when voice step is taken.
+- Reason state uses “Under review” before being removed.
+- After removal, key-signal line is annotated “removed at your request.”
+- Build tag shown in UI (v5.3).
