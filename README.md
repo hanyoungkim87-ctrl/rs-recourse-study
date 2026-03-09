@@ -1,8 +1,12 @@
-# RS Transparency Demo — Copy/UX refined preview recourse
+# RS Transparency Demo — v4.1 (Keep vs Remove reason)
 
-Tweaks vs prior:
-- Less awkward copy:
-  - Step 1: 'Contest a reason' / acknowledgement wording
-  - Step 2: 'Show one alternative' / 'Keep current' vs 'Switch to alternative'
-- Reason line uses a clear quiz attribute label and becomes 'removed at your request'
-- After decision, a short status line appears and (if switched) the changed card flashes briefly
+This version fixes the “I don't want to remove it” problem by making the reason step a forced **choice**, not a forced deletion:
+
+Recourse (C/D):
+1) Reason decision: **Keep this reason** OR **Remove this reason**
+   - Shows badge: Kept / Removed
+2) Alternative preview appears (shown once)
+3) Choose Keep current vs Use alternative
+Finish is gated until the keep/use decision is made.
+
+Upload `index.html`, `app.html`, `README.md` to repo root for GitHub Pages.

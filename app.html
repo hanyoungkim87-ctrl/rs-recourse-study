@@ -11,6 +11,7 @@
       --accent:#2f6f4e; --accent2:#b04a63;
       --shadow:0 10px 40px rgba(0,0,0,.10);
       --hi:#fff3b0;
+      --okbg:#f2f7f4; --okbd:rgba(47,111,78,.35); --ok:#1f5a3f;
     }
     body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink)}
     .hero{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:40px 18px;background:linear-gradient(180deg, rgba(0,0,0,.03), rgba(0,0,0,0));}
@@ -43,36 +44,43 @@
     .footerRow{display:flex;justify-content:flex-end;gap:10px;margin-top:22px}
     .nextBtn{border:0;border-radius:999px;padding:12px 18px;background:var(--accent);color:#fff;font-weight:650;cursor:pointer}
     .nextBtn.secondary{background:#f3efe7;color:#111;border:1px solid var(--border)}
+    .nextBtn:disabled{opacity:.55;cursor:not-allowed}
 
     .topLine{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:10px}
     .condBadge{font-size:12px;background:#f3efe7;border:1px solid var(--border);border-radius:999px;padding:6px 10px;color:#444}
     .explainBox{border:1px solid var(--border);border-radius:14px;padding:16px;background:#fbfaf8;font-size:18px;line-height:1.45}
     .keyLine{margin-top:10px;font-size:16px;color:#333}
-    .recourseRow{margin-top:14px;display:flex;flex-direction:column;gap:10px}
-    .stepTitle{font-weight:750}
-    .stepRow{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    .badge{display:inline-block;font-size:12px;background:#f3efe7;border:1px solid var(--border);border-radius:999px;padding:4px 8px;margin-bottom:8px;color:#444}
+    .badge.green{background:var(--okbg);border-color:var(--okbd);color:var(--ok)}
+    .badge.blue{background:#eef4ff;border-color:#d8e6ff;color:#2b4c8a}
+
+    .recourse{margin-top:14px}
+    .recourseTitle{font-weight:750;margin-bottom:10px}
+    .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
     .recourseBtn{border:1px solid var(--border);background:#fff;border-radius:999px;padding:10px 14px;cursor:pointer;font-weight:650}
     .recourseBtn:hover{background:#f6f3ee}
     .recourseBtn:disabled{opacity:.55;cursor:not-allowed}
-    .confirmMsg{font-size:14px;color:#2c6f4d;display:none}
-    .confirmMsg.show{display:block}
-    .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-top:16px}
-    .pCard{border:1px solid var(--border);border-radius:14px;padding:14px;background:#fff}
-    .pCard.flash{outline:3px solid var(--hi)}
-    .pName{font-weight:750;margin:0 0 6px}
-    .badge{display:inline-block;font-size:12px;background:#f3efe7;border:1px solid var(--border);border-radius:999px;padding:4px 8px;margin-bottom:8px;color:#444}
-    .note{margin-top:14px;color:#9b2c44;font-size:14px;letter-spacing:.18em}
-    ul{margin:0;padding-left:18px;color:#444}
-    li{margin:6px 0}
 
-    .previewBox{margin-top:10px;border:1px dashed #d8d0c3;border-radius:12px;padding:12px;background:#fff}
+    .toast{display:none;margin-top:10px;background:var(--okbg);border:1px solid var(--okbd);color:var(--ok);border-radius:12px;padding:10px 12px;font-size:14px}
+    .toast.show{display:block}
+    .toast.fade{opacity:0;transition:opacity .35s ease}
+
+    .preview{margin-top:10px;border:1px dashed #d8d0c3;border-radius:12px;padding:12px;background:#fff;display:none}
     .previewTop{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
     .choiceBtns{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
     .miniBtn{border:1px solid var(--border);background:#f3efe7;border-radius:999px;padding:9px 12px;cursor:pointer;font-weight:650}
     .miniBtn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
     .miniBtn:disabled{opacity:.55;cursor:not-allowed}
-    .miniBtn.primary:disabled{background:#b9cbbf;border-color:#b9cbbf;color:#fff}
-    .statusLine{margin-top:8px;font-size:13px;color:#555}
+    .decisionLine{margin-top:8px;font-size:13px;color:#555;display:none}
+
+    .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-top:16px}
+    .pCard{border:1px solid var(--border);border-radius:14px;padding:14px;background:#fff}
+    .pCard.flash{outline:3px solid var(--hi)}
+    .pName{font-weight:750;margin:0 0 6px}
+    ul{margin:0;padding-left:18px;color:#444}
+    li{margin:6px 0}
+    .note{margin-top:14px;color:#9b2c44;font-size:14px;letter-spacing:.18em}
+
     @media (max-width:520px){
       h1{font-size:34px}
       .modalTitle{font-size:30px}
@@ -102,6 +110,7 @@
     </div>
   </div>
 
+  <!-- QUIZ MODAL -->
   <div class="overlay" id="quizOverlay">
     <div class="modal" role="dialog" aria-modal="true">
       <button class="close" id="quizClose" aria-label="Close">×</button>
@@ -119,6 +128,7 @@
     </div>
   </div>
 
+  <!-- CONTROL MODAL -->
   <div class="overlay" id="controlOverlay">
     <div class="modal" role="dialog" aria-modal="true">
       <button class="close" id="controlClose" aria-label="Close">×</button>
@@ -144,6 +154,7 @@
     </div>
   </div>
 
+  <!-- RESULTS MODAL -->
   <div class="overlay" id="resultsOverlay">
     <div class="modal" role="dialog" aria-modal="true">
       <button class="close" id="resultsClose" aria-label="Close">×</button>
@@ -158,34 +169,29 @@
           Our system uses 50% of your inputs and 50% of product details with user feedback to generate the recommendations for you.
           <div class="keyLine">
             <b>Key signal used:</b> <span id="keySignal"></span>
+            <span class="badge green" id="reasonBadge" style="display:none;"></span>
           </div>
 
-          <div class="recourseRow" id="recourseRow">
-            <div class="stepTitle">Feedback and corrections (2 steps)</div>
-
-            <div class="stepRow">
-              <span><b>Step 1:</b> Contest a reason.</span>
+          <div class="recourse" id="recourse">
+            <div class="recourseTitle">Does this look right?</div>
+            <div class="row">
+              <button class="recourseBtn" id="keepReasonBtn" type="button">Keep this reason</button>
               <button class="recourseBtn" id="removeReasonBtn" type="button">Remove this reason</button>
-              <div class="confirmMsg" id="confirm1">Reason removed (acknowledged).</div>
             </div>
 
-            <div class="stepRow">
-              <span><b>Step 2:</b> Preview one alternative.</span>
-              <button class="recourseBtn" id="previewAltBtn" type="button">Show one alternative</button>
-              <div class="confirmMsg" id="confirm2">Alternative shown. Choose keep vs switch to continue.</div>
-            </div>
+            <div class="toast" id="toast"></div>
 
-            <div class="previewBox" id="previewBox" style="display:none;">
+            <div class="preview" id="preview">
               <div class="previewTop">
-                <b>Alternative suggestion (preview)</b>
-                <span class="badge" id="previewStatus">Preview</span>
+                <b>Alternative (preview)</b>
+                <span class="badge blue" id="previewStatus">Preview</span>
               </div>
               <div id="previewCard"></div>
-              <div class="statusLine" id="decisionLine" style="display:none;"></div>
               <div class="choiceBtns">
                 <button class="miniBtn" id="keepBtn" type="button">Keep current</button>
-                <button class="miniBtn primary" id="switchBtn" type="button">Switch to alternative</button>
+                <button class="miniBtn primary" id="useAltBtn" type="button">Use alternative</button>
               </div>
+              <div class="decisionLine" id="decisionLine"></div>
             </div>
           </div>
         </div>
@@ -214,7 +220,6 @@
   document.getElementById('heroSub').textContent = (product === 'usb') ? 'Find a USB drive that fits your needs.' : 'Discover your perfect wine pairing.';
   document.getElementById('condPill').textContent = `Condition ${cond} — ${(hasControl?'Control ':'')}${(hasRecourse?'Recourse':'') || 'Explanation-only'}`;
   document.getElementById('resultsCondBadge').textContent = `Cond ${cond} (Control ${hasControl?'ON':'OFF'}, Recourse ${hasRecourse?'ON':'OFF'})`;
-
   document.getElementById('backBtn').addEventListener('click', ()=> location.href='index.html');
 
   const quizOverlay = document.getElementById('quizOverlay');
@@ -307,38 +312,44 @@
     }
   });
 
-  // start quiz
   document.getElementById('startBtn').addEventListener('click', ()=>{
     step=0; for(let i=0;i<answers.length;i++) answers[i]=null;
     renderStep(); show(quizOverlay);
   });
 
-  // close buttons
   document.getElementById('quizClose').addEventListener('click', ()=> hide(quizOverlay));
   document.getElementById('controlClose').addEventListener('click', ()=> hide(controlOverlay));
   document.getElementById('resultsClose').addEventListener('click', ()=> hide(resultsOverlay));
-
-  // control confirm
   document.getElementById('controlConfirm').addEventListener('click', ()=>{ hide(controlOverlay); showResults(); });
 
-  // results + recourse
-  const recourseRow = document.getElementById('recourseRow');
+  // Results + recourse
+  const recourseEl = document.getElementById('recourse');
+  const keySignalEl = document.getElementById('keySignal');
+  const reasonBadge = document.getElementById('reasonBadge');
+  const keepReasonBtn = document.getElementById('keepReasonBtn');
   const removeReasonBtn = document.getElementById('removeReasonBtn');
-  const previewAltBtn = document.getElementById('previewAltBtn');
-  const confirm1 = document.getElementById('confirm1');
-  const confirm2 = document.getElementById('confirm2');
-  const keySignal = document.getElementById('keySignal');
-  const previewBox = document.getElementById('previewBox');
+  const toast = document.getElementById('toast');
+
+  const preview = document.getElementById('preview');
   const previewCard = document.getElementById('previewCard');
   const previewStatus = document.getElementById('previewStatus');
-  const decisionLine = document.getElementById('decisionLine');
   const keepBtn = document.getElementById('keepBtn');
-  const switchBtn = document.getElementById('switchBtn');
+  const useAltBtn = document.getElementById('useAltBtn');
+  const decisionLine = document.getElementById('decisionLine');
+
   const finishBtn = document.getElementById('finishBtn');
 
-  let removedReason = false;
-  let previewShown = false;
-  let decision = null; // 'keep' or 'switch'
+  let reasonDecision = null; // 'kept' or 'removed'
+  let altShown = false;
+  let decision = null;
+
+  function setToast(msg){
+    toast.classList.remove('fade');
+    toast.textContent = msg;
+    toast.classList.add('show');
+    setTimeout(()=>{ toast.classList.add('fade'); }, 2200);
+    setTimeout(()=>{ toast.classList.remove('show'); toast.classList.remove('fade'); }, 2700);
+  }
 
   function renderCards(items, flashIndex=null){
     const cards = document.getElementById('cards');
@@ -346,12 +357,10 @@
     items.forEach((it, idx)=>{
       const c = document.createElement('div');
       c.className='pCard' + ((flashIndex===idx)?' flash':'');
-      const badge = it.badge ? `<div class="badge">${it.badge}</div>` : '';
+      const badge = it.badge ? `<div class="badge ${it.badgeClass||''}">${it.badge}</div>` : '';
       c.innerHTML = `${badge}<div class="pName">${it.name}</div><ul>${it.bullets.map(b=>`<li>${b}</li>`).join('')}</ul>`;
       cards.appendChild(c);
-      if(flashIndex===idx){
-        setTimeout(()=>c.classList.remove('flash'), 800);
-      }
+      if(flashIndex===idx){ setTimeout(()=>c.classList.remove('flash'), 900); }
     });
   }
 
@@ -379,84 +388,101 @@
     ? {name:'FlexFit USB Drive', badge:'Alternative suggestion', bullets:['Description: Suggested after your feedback to better match your needs.','Style: Lightweight and versatile.','Experience: A good all-purpose choice.']}
     : {name:'Citrus Breeze White', badge:'Alternative suggestion', bullets:['Description: Suggested after your feedback to better match your preference.','Style: Bright and easy-going.','Experience: Great for casual sipping and light foods.']};
 
-  function showResults(){
-    recourseRow.style.display = hasRecourse ? 'flex' : 'none';
-    removedReason = false; previewShown = false; decision = null;
+  function resetRecourse(){
+    reasonDecision = null;
+    altShown = false;
+    decision = null;
 
-    confirm1.classList.remove('show');
-    confirm2.classList.remove('show');
-    previewBox.style.display = 'none';
+    keySignalEl.textContent = keySignalBase;
+    reasonBadge.style.display = 'none';
+    reasonBadge.textContent = '';
+
+    keepReasonBtn.disabled = false;
+    removeReasonBtn.disabled = false;
+
+    preview.style.display = 'none';
+    previewStatus.textContent = 'Preview';
+    keepBtn.disabled = true;
+    useAltBtn.disabled = true;
     decisionLine.style.display = 'none';
     decisionLine.textContent = '';
-    previewStatus.textContent = 'Preview';
 
-    keySignal.textContent = keySignalBase;
-
-    removeReasonBtn.disabled = false;
-    previewAltBtn.disabled = true;
-    keepBtn.disabled = true;
-    switchBtn.disabled = true;
-
-    renderCards(JSON.parse(JSON.stringify(baseItems)));
-
-    // For recourse conditions, require a decision after preview
     finishBtn.disabled = hasRecourse;
-    finishBtn.style.opacity = finishBtn.disabled ? '0.55' : '1';
+  }
 
+  function showAlternativePreview(){
+    if(altShown) return;
+    altShown = true;
+    preview.style.display = 'block';
+    renderPreview(altItem);
+    keepBtn.disabled = false;
+    useAltBtn.disabled = false;
+    setToast('Alternative shown. Choose keep or use alternative to continue.');
+  }
+
+  function showResults(){
     document.getElementById('resultsTitle').textContent = (product === 'usb') ? 'USB Recommendations' : 'Wine Recommendations';
+    recourseEl.style.display = hasRecourse ? 'block' : 'none';
+    renderCards(JSON.parse(JSON.stringify(baseItems)));
+    resetRecourse();
     show(resultsOverlay);
   }
 
+  // Reason decision: keep vs remove
+  keepReasonBtn.addEventListener('click', ()=>{
+    if(!hasRecourse) return;
+    reasonDecision = 'kept';
+    reasonBadge.style.display = 'inline-block';
+    reasonBadge.textContent = 'Kept';
+    keySignalEl.textContent = keySignalBase; // unchanged
+    keepReasonBtn.disabled = true;
+    removeReasonBtn.disabled = true;
+    setToast('Saved. We will keep using this reason.');
+    showAlternativePreview();
+  });
+
   removeReasonBtn.addEventListener('click', ()=>{
     if(!hasRecourse) return;
-    removedReason = true;
-    confirm1.classList.add('show');
-    keySignal.textContent = keySignalBase.replace('(weighted heavily)', '(removed at your request)');
+    reasonDecision = 'removed';
+    reasonBadge.style.display = 'inline-block';
+    reasonBadge.textContent = 'Removed';
+    keySignalEl.textContent = keySignalBase.replace('(weighted heavily)','(removed)');
+    keepReasonBtn.disabled = true;
     removeReasonBtn.disabled = true;
-    previewAltBtn.disabled = false;
+    setToast('Saved. This reason will not be used.');
+    showAlternativePreview();
   });
 
-  previewAltBtn.addEventListener('click', ()=>{
-    if(!hasRecourse || !removedReason) return;
-    previewShown = true;
-    confirm2.classList.add('show');
-    previewAltBtn.disabled = true;
-
-    previewBox.style.display = 'block';
-    renderPreview(altItem);
-
-    keepBtn.disabled = false;
-    switchBtn.disabled = false;
-  });
-
-  function enableFinish(){
-    finishBtn.disabled = false;
-    finishBtn.style.opacity = '1';
-  }
+  function enableFinish(){ finishBtn.disabled = false; }
 
   keepBtn.addEventListener('click', ()=>{
-    if(!hasRecourse || !previewShown) return;
+    if(!hasRecourse || !altShown) return;
     decision = 'keep';
-    previewStatus.textContent = 'Decision recorded';
+    previewStatus.textContent = 'Saved';
     decisionLine.style.display = 'block';
-    decisionLine.textContent = 'No changes made. Keeping the current recommendations.';
+    decisionLine.textContent = 'Saved. Keeping the current recommendations.';
     keepBtn.disabled = true;
-    switchBtn.disabled = true;
+    useAltBtn.disabled = true;
+    setToast('Saved. No changes were made.');
     enableFinish();
   });
 
-  switchBtn.addEventListener('click', ()=>{
-    if(!hasRecourse || !previewShown) return;
-    decision = 'switch';
+  useAltBtn.addEventListener('click', ()=>{
+    if(!hasRecourse || !altShown) return;
+    decision = 'use_alt';
     const items = JSON.parse(JSON.stringify(baseItems));
-    items[2] = altItem; // replace right-most item
+    items[2] = {...altItem, badge:'Updated recommendation', badgeClass:'green'};
     renderCards(items, 2);
 
-    previewStatus.textContent = 'Decision recorded';
+    previewStatus.textContent = 'Saved';
     decisionLine.style.display = 'block';
-    decisionLine.textContent = 'Updated. The right-most recommendation has been replaced with the alternative.';
+    decisionLine.textContent = 'Saved. The right-most recommendation was updated.';
     keepBtn.disabled = true;
-    switchBtn.disabled = true;
+    useAltBtn.disabled = true;
+
+    setTimeout(()=>{ preview.style.display = 'none'; }, 650);
+
+    setToast('Saved. Recommendations updated.');
     enableFinish();
   });
 
@@ -473,15 +499,14 @@
       recourse: hasRecourse,
       quizAnswers: answers,
       sliderBalance: hasControl ? Number(document.getElementById('balanceSlider').value) : null,
-      recourse_step1_removeReason: hasRecourse ? removedReason : null,
-      recourse_step2_previewShown: hasRecourse ? previewShown : null,
-      recourse_step2_decision: hasRecourse ? decision : null,
+      recourse_reasonDecision: hasRecourse ? reasonDecision : null,
+      recourse_previewShown: hasRecourse ? altShown : null,
+      recourse_decision: hasRecourse ? decision : null,
       timestamp: new Date().toISOString()
     };
     alert('Demo finished.\n\n' + JSON.stringify(payload, null, 2));
   });
 
-  // Wire control confirm + initial quiz render
   renderStep();
 })();
 </script>
