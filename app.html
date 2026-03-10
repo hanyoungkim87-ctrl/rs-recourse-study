@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Recommender Demo · v6.1</title>
+  <title>Recommender Demo · v6.2</title>
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
@@ -65,6 +65,7 @@
     .recBtn{border:1px solid var(--border);background:#fff;border-radius:999px;padding:10px 14px;cursor:pointer;font-weight:650}
     .recBtn:hover{background:#f6f3ee}
     .recBtn:disabled{opacity:.45;cursor:not-allowed}
+    .recBtn.armed{background:var(--accent);color:#fff;border-color:rgba(47,111,78,.25)}
 
     .statusBox{display:none;margin-top:10px;font-size:14px;color:#333;background:#fff;border:1px solid var(--border);border-radius:12px;padding:10px 12px}
     .statusBox.show{display:block}
@@ -97,7 +98,7 @@
     <div class="heroCard">
       <div class="heroTop">
         <span class="tag" id="contextTag">Demo</span>
-        <span class="badge info">v6.1</span>
+        <span class="badge info">v6.2</span>
         <h1 id="heroTitle">Recommender</h1>
         <p class="sub" id="heroSub">Discover recommendations based on a short quiz.</p>
       </div>
@@ -190,6 +191,7 @@
             <div class="recTitle" style="margin-top:14px">Want to remove one option?</div>
             <div class="row">
               <button class="recBtn" id="hideBtn" disabled>Hide one item and show an alternative</button>
+              <button class="recBtn" id="hideCancel" style="display:none" type="button">Cancel</button>
             </div>
 
             <div class="toast ok" id="toastOk"></div>
@@ -210,7 +212,7 @@
 
 <script>
 (() => {
-  const VERSION = "v6.1";
+  const VERSION = "v6.2";
   const $ = (id) => document.getElementById(id);
 
   // URL params
@@ -318,7 +320,7 @@
 
   $('quizClose').addEventListener('click', ()=> hide(quizOverlay));
   $('controlClose').addEventListener('click', ()=> hide(controlOverlay));
-  $('resultsClose').addEventListener('click', ()=>{ newSession(); hide(resultsOverlay); });
+  $('resultsClose').addEventListener('click', ()=> hide(resultsOverlay));
 
   // Results data
   const baseWine = [
@@ -342,10 +344,7 @@
   let items = [];
   let reasonAnswered = false;
   let hideUsed = false;
-
-  // Session token to prevent stale async callbacks from previous runs
-  let sessionToken = 0;
-  function newSession(){ sessionToken++; return sessionToken; }
+  let hideArmed = false; // two-step confirmation for hide
 
   function renderCards(flashIndex=null){
     const cards = $('cards');
@@ -365,9 +364,26 @@
   function updateHideLabel(){
     if(!hasRecourse) return;
     const btn = $('hideBtn');
+    const cancel = $('hideCancel');
     if(!btn) return;
     const target = items[2]?.name || 'this item';
-    btn.textContent = `Hide “${target}” and show an alternative`;
+
+    if(hideUsed){
+      btn.textContent = `Hidden: “${target}”`;
+      btn.classList.remove('armed');
+      if(cancel) cancel.style.display = 'none';
+      return;
+    }
+
+    if(hideArmed){
+      btn.textContent = `Confirm: replace “${target}”`;
+      btn.classList.add('armed');
+      if(cancel) cancel.style.display = 'inline-block';
+    } else {
+      btn.textContent = `Hide “${target}” and show an alternative`;
+      btn.classList.remove('armed');
+      if(cancel) cancel.style.display = 'none';
+    }
   }
 
   function setStatus(on, msg){
@@ -402,18 +418,18 @@
   }
 
   function resetResults(){
-    // cancel any pending async updates from previous interactions
-    newSession();
     items = JSON.parse(JSON.stringify((product==='usb')?baseUSB:baseWine));
     renderCards();
 
     reasonAnswered = false;
     hideUsed = false;
+    hideArmed = false;
 
     $('reasonYes').disabled = false;
     $('reasonNo').disabled  = false;
 
     $('hideBtn').disabled = true;
+    if($('hideCancel')) $('hideCancel').style.display = 'none';
 
     $('reasonState').style.display = 'none';
     $('reasonState').textContent = '';
@@ -426,7 +442,7 @@
   }
 
   function showResults(){
-    $('resultsTitle').textContent = ((product === 'usb') ? 'USB Recommendations' : 'Wine Recommendations') + ` · v6.1`;
+    $('resultsTitle').textContent = ((product === 'usb') ? 'USB Recommendations' : 'Wine Recommendations') + ` · v6.2`;
     $('explainLine').textContent = hasControl
       ? `Our system uses ${Number($('balanceSlider').value)}% of your inputs and ${100-Number($('balanceSlider').value)}% of product details with user feedback to generate the recommendations for you.`
       : 'Our system uses 50% of your inputs and 50% of product details with user feedback to generate the recommendations for you.';
@@ -445,10 +461,7 @@
     if(!hasRecourse || reasonAnswered) return;
     reasonAnswered = true;
 
-    const token = sessionToken;
-
     clearToasts();
-    $('toastInfo').classList.remove('show','fade'); $('toastInfo').textContent='';
     $('finishBtn').disabled = true;
 
     // Lock only yes/no
@@ -464,13 +477,13 @@
     toast($('toastOk'), 'Thanks—confirmed. We will keep using this signal.');
 
     $('hideBtn').disabled = false;
+    hideArmed = false;
+    updateHideLabel();
   });
 
   $('reasonNo').addEventListener('click', ()=>{
     if(!hasRecourse || reasonAnswered) return;
     reasonAnswered = true;
-
-    const token = sessionToken;
 
     clearToasts();
     $('finishBtn').disabled = true;
@@ -486,14 +499,12 @@
     setStatus(true, 'Reviewing your feedback and refreshing recommendations…');
 
     setTimeout(()=>{
-      if(token !== sessionToken) return;
       // Very obvious refresh: replace TOP item
       const rep = (product==='usb') ? altUSBTop : altWineTop;
       items[0] = JSON.parse(JSON.stringify(rep));
       renderCards(0);
 
       requestAnimationFrame(()=>requestAnimationFrame(()=>{
-        if(token !== sessionToken) return;
         $('reasonState').textContent = 'Removed';
         $('keySignal').textContent = $('keySignal').textContent + ' (removed at your request)';
 
@@ -503,6 +514,8 @@
         toast($('toastOk'), 'Applied. We removed that signal and refreshed your recommendations.');
 
         $('hideBtn').disabled = false;
+    hideArmed = false;
+    updateHideLabel();
       }));
     }, 900);
   });
@@ -510,7 +523,21 @@
   // Recourse: repair
   $('hideBtn').addEventListener('click', ()=>{
     if(!hasRecourse || hideUsed || !reasonAnswered) return;
+
+    // First click: arm (no changes yet)
+    if(!hideArmed){
+      hideArmed = true;
+      updateHideLabel();
+      clearToasts();
+      setStatus(true, 'Ready. Click “Confirm” to replace one item (or Cancel).');
+      setTimeout(()=>setStatus(false,''), 1200);
+      return;
+    }
+
+    // Second click: apply replacement
     hideUsed = true;
+    hideArmed = false;
+    updateHideLabel();
 
     clearToasts();
     $('finishBtn').disabled = true;
@@ -521,24 +548,22 @@
     setStatus(true, 'Finding an alternative…');
 
     setTimeout(()=>{
-      if(token !== sessionToken) return;
       const rep = (product==='usb') ? altUSBHide : altWineHide;
       items[2] = JSON.parse(JSON.stringify(rep));
       renderCards(2);
 
       requestAnimationFrame(()=>requestAnimationFrame(()=>{
-        if(token !== sessionToken) return;
         $('hideBtn').textContent = original;
         setStatus(false, '');
         toast($('toastInfo'), 'Applied. We replaced the hidden item with an alternative.');
         $('finishBtn').disabled = false;
+        updateHideLabel();
       }));
     }, 850);
   });
 
   // Restart/Finish
   $('restartBtn').addEventListener('click', ()=>{
-    newSession();
     hide(resultsOverlay);
     step=0; for(let i=0;i<answers.length;i++) answers[i]=null;
     renderStep(); show(quizOverlay);
@@ -561,7 +586,7 @@
 
   // Close buttons
   $('startBtn').addEventListener('keydown', (e)=>{ if(e.key==='Enter') $('startBtn').click(); });
-  $('resultsClose').addEventListener('click', ()=>{ newSession(); hide(resultsOverlay); });
+  $('resultsClose').addEventListener('click', ()=> hide(resultsOverlay));
   $('quizClose').addEventListener('click', ()=> hide(quizOverlay));
   $('controlClose').addEventListener('click', ()=> hide(controlOverlay));
 

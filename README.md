@@ -1,4 +1,4 @@
-# RS Recourse Demo — v6.1 (clean rebuild)
+# RS Recourse Demo — v6.2 (clean rebuild)
 
 This is a clean rebuild after patch-chain issues.
 
@@ -15,6 +15,8 @@ Upload `index.html`, `app.html`, `README.md` to repo root and hard refresh (Cmd+
 Launcher links include `&v=6` for cache-busting.
 
 
-v6.1 fix:
-- Added a session token so any pending timeouts/animation-frame callbacks from earlier clicks cannot fire after a restart or a new action.
-- Prevents the “hide replacement applied” message from appearing when the user only clicked the reason contest button.
+v6.2: Two-step confirmation for Step 2 (Hide/Replace).
+- First click arms the action (no list change, no 'Applied').
+- Second click confirms and applies.
+- Cancel button resets the armed state.
+This prevents the 'hidden item replaced' message from appearing unless the user explicitly confirms.
