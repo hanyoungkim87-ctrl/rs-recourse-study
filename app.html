@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Recommender Demo · v6.2</title>
+  <title>Recommender Demo · v6.4</title>
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
@@ -65,16 +65,18 @@
     .recBtn{border:1px solid var(--border);background:#fff;border-radius:999px;padding:10px 14px;cursor:pointer;font-weight:650}
     .recBtn:hover{background:#f6f3ee}
     .recBtn:disabled{opacity:.45;cursor:not-allowed}
-    .recBtn.armed{background:var(--accent);color:#fff;border-color:rgba(47,111,78,.25)}
-
-    .statusBox{display:none;margin-top:10px;font-size:14px;color:#333;background:#fff;border:1px solid var(--border);border-radius:12px;padding:10px 12px}
-    .statusBox.show{display:block}
 
     .toast{display:none;margin-top:10px;border-radius:12px;padding:10px 12px;font-size:14px}
     .toast.show{display:block}
     .toast.ok{background:var(--okbg);border:1px solid var(--okbd);color:var(--ok)}
     .toast.info{background:var(--infobg);border:1px solid var(--infobd);color:var(--info)}
     .toast.fade{opacity:0;transition:opacity .35s ease}
+
+    .previewBox{display:none;margin-top:12px;border-radius:14px;border:1px dashed var(--border);background:#fff;padding:14px}
+    .previewBox.show{display:block}
+    .previewTitle{display:flex;justify-content:space-between;align-items:center;gap:10px}
+    .previewTitle h3{margin:0;font-size:16px}
+    .previewActions{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
 
     .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-top:16px}
     .pCard{border:1px solid var(--border);border-radius:14px;padding:14px;background:#fff;position:relative}
@@ -84,13 +86,6 @@
     li{margin:6px 0}
 
     .note{margin-top:14px;color:#9b2c44;font-size:14px;letter-spacing:.18em}
-
-    @media (max-width:520px){
-      h1{font-size:34px}
-      .modalTitle{font-size:30px}
-      .q{font-size:26px}
-      .rangeLabels{letter-spacing:.08em}
-    }
   </style>
 </head>
 <body>
@@ -98,13 +93,13 @@
     <div class="heroCard">
       <div class="heroTop">
         <span class="tag" id="contextTag">Demo</span>
-        <span class="badge info">v6.2</span>
+        <span class="badge info">v6.4</span>
         <h1 id="heroTitle">Recommender</h1>
         <p class="sub" id="heroSub">Discover recommendations based on a short quiz.</p>
       </div>
       <div class="heroBottom">
         <div class="meta">
-          <span class="pill">Flow: landing → 5-question quiz → (Control slider for B/D) → results</span>
+          <span class="pill">Flow: landing → quiz → (control slider for B/D) → results</span>
           <span class="pill" id="condPill">Condition</span>
         </div>
         <div style="display:flex;gap:10px;flex-wrap:wrap">
@@ -186,12 +181,16 @@
               <button class="recBtn" id="reasonNo">No, that's not right</button>
             </div>
 
-            <div class="statusBox" id="statusBox">Working…</div>
-
-            <div class="recTitle" style="margin-top:14px">Want to remove one option?</div>
-            <div class="row">
-              <button class="recBtn" id="hideBtn" disabled>Hide one item and show an alternative</button>
-              <button class="recBtn" id="hideCancel" style="display:none" type="button">Cancel</button>
+            <div class="previewBox" id="altPreviewBox">
+              <div class="previewTitle">
+                <h3>Alternative option (preview)</h3>
+                <span class="badge info" id="previewBadge">Decision needed</span>
+              </div>
+              <div id="altPreviewCard"></div>
+              <div class="previewActions">
+                <button class="recBtn" id="keepBtn">Keep current recommendations</button>
+                <button class="recBtn" id="switchBtn">Switch to this alternative</button>
+              </div>
             </div>
 
             <div class="toast ok" id="toastOk"></div>
@@ -212,7 +211,7 @@
 
 <script>
 (() => {
-  const VERSION = "v6.2";
+  const VERSION = "v6.4";
   const $ = (id) => document.getElementById(id);
 
   // URL params
@@ -338,13 +337,13 @@
   const altWineTop = {name:'Citrus Breeze White', bullets:['Description: Suggested after your correction to better match your preference.','Style: Bright and easy-going.','Experience: Great for casual sipping and light foods.'], badge:'Updated after your correction', badgeType:'info'};
   const altUSBTop  = {name:'FlexFit USB Drive', bullets:['Description: Suggested after your correction to better match your needs.','Style: Lightweight and versatile.','Experience: A good all-purpose choice.'], badge:'Updated after your correction', badgeType:'info'};
 
-  const altWineHide = {name:'Cozy Orchard Rosé', bullets:['Description: An alternative option suggested after you hid an item.','Style: Soft and comforting; gentle fruit notes.','Experience: Easy to enjoy in relaxed settings.'], badge:'Updated after your feedback', badgeType:'ok'};
-  const altUSBHide  = {name:'PocketPro USB Drive', bullets:['Description: An alternative option suggested after you hid an item.','Style: Compact and minimal.','Experience: Convenient for everyday carry.'], badge:'Updated after your feedback', badgeType:'ok'};
+  const altWineAlt = {name:'Cozy Orchard Rosé', bullets:['Description: An alternative option you can choose to switch to.','Style: Soft and comforting; gentle fruit notes.','Experience: Easy to enjoy in relaxed settings.'], badge:'Alternative (preview)', badgeType:'info'};
+  const altUSBAlt  = {name:'PocketPro USB Drive', bullets:['Description: An alternative option you can choose to switch to.','Style: Compact and minimal.','Experience: Convenient for everyday carry.'], badge:'Alternative (preview)', badgeType:'info'};
 
   let items = [];
   let reasonAnswered = false;
-  let hideUsed = false;
-  let hideArmed = false; // two-step confirmation for hide
+  let decisionMade = false;
+  let contestUsed = false; // whether No was used (so we require keep/switch)
 
   function renderCards(flashIndex=null){
     const cards = $('cards');
@@ -356,40 +355,8 @@
       const badge = it.badge ? `<span class="${badgeClass}">${it.badge}</span>` : '';
       c.innerHTML = `<div class="pName">${it.name} ${badge}</div><ul>${it.bullets.map(b=>`<li>${b}</li>`).join('')}</ul>`;
       cards.appendChild(c);
-      if(flashIndex===idx) setTimeout(()=>c.classList.remove('flash'), 950);
+      if(flashIndex===idx) setTimeout(()=>c.classList.remove('flash'), 600);
     });
-    updateHideLabel();
-  }
-
-  function updateHideLabel(){
-    if(!hasRecourse) return;
-    const btn = $('hideBtn');
-    const cancel = $('hideCancel');
-    if(!btn) return;
-    const target = items[2]?.name || 'this item';
-
-    if(hideUsed){
-      btn.textContent = `Hidden: “${target}”`;
-      btn.classList.remove('armed');
-      if(cancel) cancel.style.display = 'none';
-      return;
-    }
-
-    if(hideArmed){
-      btn.textContent = `Confirm: replace “${target}”`;
-      btn.classList.add('armed');
-      if(cancel) cancel.style.display = 'inline-block';
-    } else {
-      btn.textContent = `Hide “${target}” and show an alternative`;
-      btn.classList.remove('armed');
-      if(cancel) cancel.style.display = 'none';
-    }
-  }
-
-  function setStatus(on, msg){
-    const box = $('statusBox');
-    if(msg) box.textContent = msg;
-    if(on) box.classList.add('show'); else box.classList.remove('show');
   }
 
   function clearToasts(){
@@ -417,36 +384,47 @@
     }
   }
 
+  function setPreviewVisible(on){
+    const box = $('altPreviewBox');
+    if(on) box.classList.add('show'); else box.classList.remove('show');
+  }
+
+  function renderPreviewCard(alt){
+    const host = $('altPreviewCard');
+    const badge = `<span class="badge info">${alt.badge}</span>`;
+    host.innerHTML = `<div class="pName">${alt.name} ${badge}</div><ul>${alt.bullets.map(b=>`<li>${b}</li>`).join('')}</ul>`;
+  }
+
   function resetResults(){
+    clearToasts();
+    setPreviewVisible(false);
+    $('previewBadge').textContent = 'Decision needed';
+
     items = JSON.parse(JSON.stringify((product==='usb')?baseUSB:baseWine));
     renderCards();
 
     reasonAnswered = false;
-    hideUsed = false;
-    hideArmed = false;
+    decisionMade = false;
+    contestUsed = false;
 
     $('reasonYes').disabled = false;
     $('reasonNo').disabled  = false;
 
-    $('hideBtn').disabled = true;
-    if($('hideCancel')) $('hideCancel').style.display = 'none';
+    $('keepBtn').disabled = false;
+    $('switchBtn').disabled = false;
 
     $('reasonState').style.display = 'none';
     $('reasonState').textContent = '';
 
-    setStatus(false, '');
-    clearToasts();
-
-    $('finishBtn').disabled = hasRecourse; // gate for recourse
+    $('finishBtn').disabled = hasRecourse; // gated in recourse
     if(!hasRecourse) $('finishBtn').disabled = false;
   }
 
   function showResults(){
-    $('resultsTitle').textContent = ((product === 'usb') ? 'USB Recommendations' : 'Wine Recommendations') + ` · v6.2`;
+    $('resultsTitle').textContent = ((product === 'usb') ? 'USB Recommendations' : 'Wine Recommendations') + ` · v6.4`;
     $('explainLine').textContent = hasControl
       ? `Our system uses ${Number($('balanceSlider').value)}% of your inputs and ${100-Number($('balanceSlider').value)}% of product details with user feedback to generate the recommendations for you.`
       : 'Our system uses 50% of your inputs and 50% of product details with user feedback to generate the recommendations for you.';
-
     $('keySignal').textContent = keySignalText();
     $('recourseBlock').style.display = hasRecourse ? 'block' : 'none';
 
@@ -460,106 +438,80 @@
   $('reasonYes').addEventListener('click', ()=>{
     if(!hasRecourse || reasonAnswered) return;
     reasonAnswered = true;
+    contestUsed = false;
 
     clearToasts();
-    $('finishBtn').disabled = true;
-
-    // Lock only yes/no
     $('reasonYes').disabled = true;
     $('reasonNo').disabled  = true;
 
     $('reasonState').style.display = 'inline-block';
     $('reasonState').textContent = 'Confirmed';
 
-    setStatus(true, 'Saved. Reason confirmed.');
-    setTimeout(()=>setStatus(false,''), 700);
-
     toast($('toastOk'), 'Thanks—confirmed. We will keep using this signal.');
-
-    $('hideBtn').disabled = false;
-    hideArmed = false;
-    updateHideLabel();
+    decisionMade = true;
+    $('finishBtn').disabled = false; // no decision needed
   });
 
   $('reasonNo').addEventListener('click', ()=>{
     if(!hasRecourse || reasonAnswered) return;
     reasonAnswered = true;
+    contestUsed = true;
+    decisionMade = false;
 
     clearToasts();
-    $('finishBtn').disabled = true;
-
     $('reasonYes').disabled = true;
     $('reasonNo').disabled  = true;
+    $('finishBtn').disabled = true; // require keep/switch
 
     $('reasonState').style.display = 'inline-block';
-    $('reasonState').textContent = 'Under review';
+    $('reasonState').textContent = 'Removed';
 
-    const originalNoText = $('reasonNo').textContent;
-    $('reasonNo').textContent = 'Updating…';
-    setStatus(true, 'Reviewing your feedback and refreshing recommendations…');
+    // Apply refresh (synchronous, no timeouts)
+    const repTop = (product==='usb') ? altUSBTop : altWineTop;
+    items[0] = JSON.parse(JSON.stringify(repTop));
+    renderCards(0);
 
-    setTimeout(()=>{
-      // Very obvious refresh: replace TOP item
-      const rep = (product==='usb') ? altUSBTop : altWineTop;
-      items[0] = JSON.parse(JSON.stringify(rep));
-      renderCards(0);
+    // Mark key signal removed
+    $('keySignal').textContent = $('keySignal').textContent + ' (removed at your request)';
 
-      requestAnimationFrame(()=>requestAnimationFrame(()=>{
-        $('reasonState').textContent = 'Removed';
-        $('keySignal').textContent = $('keySignal').textContent + ' (removed at your request)';
+    toast($('toastOk'), 'Applied. We removed that signal and refreshed your recommendations.');
 
-        $('reasonNo').textContent = originalNoText;
-        setStatus(false, '');
-
-        toast($('toastOk'), 'Applied. We removed that signal and refreshed your recommendations.');
-
-        $('hideBtn').disabled = false;
-    hideArmed = false;
-    updateHideLabel();
-      }));
-    }, 900);
+    // Show alternative preview and force a final choice
+    const alt = (product==='usb') ? altUSBAlt : altWineAlt;
+    renderPreviewCard(alt);
+    setPreviewVisible(true);
+    $('previewBadge').textContent = 'Please choose';
   });
 
-  // Recourse: repair
-  $('hideBtn').addEventListener('click', ()=>{
-    if(!hasRecourse || hideUsed || !reasonAnswered) return;
+  // Step 2 decision (only meaningful after No)
+  $('keepBtn').addEventListener('click', ()=>{
+    if(!hasRecourse || !contestUsed || decisionMade) return;
+    decisionMade = true;
+    $('previewBadge').textContent = 'Decision recorded';
+    $('keepBtn').disabled = true;
+    $('switchBtn').disabled = true;
 
-    // First click: arm (no changes yet)
-    if(!hideArmed){
-      hideArmed = true;
-      updateHideLabel();
-      clearToasts();
-      setStatus(true, 'Ready. Click “Confirm” to replace one item (or Cancel).');
-      setTimeout(()=>setStatus(false,''), 1200);
-      return;
-    }
+    toast($('toastInfo'), 'Decision recorded. Keeping the current recommendations.');
+    $('finishBtn').disabled = false;
+  });
 
-    // Second click: apply replacement
-    hideUsed = true;
-    hideArmed = false;
-    updateHideLabel();
+  $('switchBtn').addEventListener('click', ()=>{
+    if(!hasRecourse || !contestUsed || decisionMade) return;
+    decisionMade = true;
+    $('previewBadge').textContent = 'Decision recorded';
+    $('keepBtn').disabled = true;
+    $('switchBtn').disabled = true;
 
-    clearToasts();
-    $('finishBtn').disabled = true;
+    // Replace the 3rd item with the alternative
+    const alt = (product==='usb') ? altUSBAlt : altWineAlt;
+    const applied = JSON.parse(JSON.stringify(alt));
+    applied.badge = 'Updated after your feedback';
+    applied.badgeType = 'ok';
+    items[2] = applied;
+    renderCards(2);
 
-    const original = $('hideBtn').textContent;
-    $('hideBtn').disabled = true;
-    $('hideBtn').textContent = 'Updating…';
-    setStatus(true, 'Finding an alternative…');
-
-    setTimeout(()=>{
-      const rep = (product==='usb') ? altUSBHide : altWineHide;
-      items[2] = JSON.parse(JSON.stringify(rep));
-      renderCards(2);
-
-      requestAnimationFrame(()=>requestAnimationFrame(()=>{
-        $('hideBtn').textContent = original;
-        setStatus(false, '');
-        toast($('toastInfo'), 'Applied. We replaced the hidden item with an alternative.');
-        $('finishBtn').disabled = false;
-        updateHideLabel();
-      }));
-    }, 850);
+    toast($('toastInfo'), 'Applied. We switched to the alternative.');
+    $('finishBtn').disabled = false;
   });
 
   // Restart/Finish
@@ -577,8 +529,9 @@
       recourse: hasRecourse,
       quizAnswers: answers,
       sliderBalance: hasControl ? Number($('balanceSlider').value) : null,
-      recourse_reasonAnswered: hasRecourse ? reasonAnswered : null,
-      recourse_hideUsed: hasRecourse ? hideUsed : null,
+      reasonAnswered: hasRecourse ? reasonAnswered : null,
+      contestUsed: hasRecourse ? contestUsed : null,
+      decisionMade: hasRecourse ? decisionMade : null,
       timestamp: new Date().toISOString()
     };
     alert('Demo finished.\n\n' + JSON.stringify(payload, null, 2));
@@ -586,9 +539,23 @@
 
   // Close buttons
   $('startBtn').addEventListener('keydown', (e)=>{ if(e.key==='Enter') $('startBtn').click(); });
-  $('resultsClose').addEventListener('click', ()=> hide(resultsOverlay));
   $('quizClose').addEventListener('click', ()=> hide(quizOverlay));
+  $('resultsClose').addEventListener('click', ()=> hide(resultsOverlay));
   $('controlClose').addEventListener('click', ()=> hide(controlOverlay));
+
+  // Wire quiz nav
+  $('quizPrev').addEventListener('click', ()=>{ if(step>0){ step--; renderStep(); } });
+  $('quizNext').addEventListener('click', ()=>{
+    const item = questions[step];
+    if(item.type === 'choice' && answers[step] === null){
+      alert('Please select one option to continue.');
+      return;
+    }
+    if(step < questions.length - 1){ step++; renderStep(); return; }
+    hide(quizOverlay);
+    if(hasControl) show(controlOverlay);
+    else showResults();
+  });
 
   // Init
   renderStep();

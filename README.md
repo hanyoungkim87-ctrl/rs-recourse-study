@@ -1,22 +1,13 @@
-# RS Recourse Demo — v6.2 (clean rebuild)
+# RS Recourse Demo — v6.4
 
-This is a clean rebuild after patch-chain issues.
+Goal: eliminate async glitches and ensure **No** provides a clear **final alternative choice**.
 
-Key behaviors:
-- **Recourse (C/D)** = voice + repair
-  1) Confirm vs contest a **specific** reason tied to the participant’s actual quiz answer.
-     - Contest replaces the TOP recommendation with a clearly different alternative + badge.
-  2) Hide one item → system replaces it with an alternative + badge.
-- **Finish is gated** in recourse conditions until repair is completed.
-- **Control (B/D)** = one lightweight slider before results.
+Changes:
+- No setTimeout for the recourse logic (No → refresh happens synchronously).
+- When users click **No**, the system shows an **Alternative option (preview)** and requires **Keep vs Switch**.
+- Finish is gated until the decision is recorded (for No). For Yes, Finish is immediately available.
 
-Deployment:
-Upload `index.html`, `app.html`, `README.md` to repo root and hard refresh (Cmd+Shift+R).
-Launcher links include `&v=6` for cache-busting.
-
-
-v6.2: Two-step confirmation for Step 2 (Hide/Replace).
-- First click arms the action (no list change, no 'Applied').
-- Second click confirms and applies.
-- Cancel button resets the armed state.
-This prevents the 'hidden item replaced' message from appearing unless the user explicitly confirms.
+Deploy:
+Upload `index.html`, `app.html`, `README.md` to repo root.
+Open with `&v=64` to avoid caching.
+Build: 2026-03-10 00:24:57Z (UTC)
