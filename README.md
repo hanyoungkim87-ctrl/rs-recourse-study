@@ -1,4 +1,4 @@
-# RS Recourse Demo — v6.4
+# RS Recourse Demo — v6.5
 
 Goal: eliminate async glitches and ensure **No** provides a clear **final alternative choice**.
 
@@ -9,5 +9,5 @@ Changes:
 
 Deploy:
 Upload `index.html`, `app.html`, `README.md` to repo root.
-Open with `&v=64` to avoid caching.
+Open with `&v=65` to avoid caching.
 Build: 2026-03-10 00:24:57Z (UTC)
