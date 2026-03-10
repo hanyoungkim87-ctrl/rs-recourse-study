@@ -1,13 +1,13 @@
-# RS Recourse Demo — v6.5
+# RS Recourse Demo — v6.6
 
-Goal: eliminate async glitches and ensure **No** provides a clear **final alternative choice**.
+Purpose: stop accidental “Switch” activation after clicking **No**.
 
-Changes:
-- No setTimeout for the recourse logic (No → refresh happens synchronously).
-- When users click **No**, the system shows an **Alternative option (preview)** and requires **Keep vs Switch**.
-- Finish is gated until the decision is recorded (for No). For Yes, Finish is immediately available.
+What changed:
+- After **No**, the preview appears, but keep/switch buttons are hidden behind **Open decision panel**.
+- After opening, buttons unlock after ~0.9s.
+- Switch requires a second confirmation click.
 
 Deploy:
 Upload `index.html`, `app.html`, `README.md` to repo root.
-Open with `&v=65` to avoid caching.
-Build: 2026-03-10 00:24:57Z (UTC)
+Open with `&v=66` to avoid caching.
+Build: 2026-03-10 01:23:36Z (UTC)
