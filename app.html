@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Recommender Demo · v6.6</title>
+  <title>Recommender Demo · v7.0 (reasoning paragraph + removable signals)</title>
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
@@ -16,6 +16,7 @@
       --hi:#fff3b0;
       --okbg:#f2f7f4; --okbd:rgba(47,111,78,.35); --ok:#1f5a3f;
       --infobg:#eef4ff; --infobd:#d8e6ff; --info:#2b4c8a;
+      --warnbg:#fff5f5; --warnbd:#ffd7d7; --warn:#a52424;
     }
     body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink)}
     .hero{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:40px 18px;background:linear-gradient(180deg, rgba(0,0,0,.03), rgba(0,0,0,0));}
@@ -25,6 +26,7 @@
     .badge{display:inline-block;font-size:12px;border:1px solid var(--border);border-radius:999px;padding:4px 8px;margin-left:8px;color:#444;background:#f3efe7;vertical-align:middle}
     .badge.ok{background:var(--okbg);border-color:var(--okbd);color:var(--ok)}
     .badge.info{background:var(--infobg);border-color:var(--infobd);color:var(--info)}
+    .badge.warn{background:var(--warnbg);border-color:var(--warnbd);color:var(--warn)}
     h1{margin:14px 0 6px;font-size:46px;letter-spacing:.2px}
     .sub{margin:0;color:var(--muted);font-size:16px}
     .heroBottom{padding:0 28px 28px;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
@@ -40,50 +42,44 @@
     .close{position:absolute;top:14px;right:14px;width:38px;height:38px;border-radius:999px;border:1px solid var(--border);background:#fff;cursor:pointer;font-size:20px;line-height:36px;text-align:center;color:#222}
     .modalInner{padding:26px}
     .modalTitle{font-size:42px;margin:0 0 14px;font-family:ui-serif, Georgia, 'Times New Roman', serif}
-    .q{font-size:38px;margin:0 0 18px;font-family:ui-serif, Georgia, 'Times New Roman', serif}
-    .choices{display:flex;flex-direction:column;gap:14px;margin-top:14px}
+    .q{font-size:34px;margin:0 0 16px;font-family:ui-serif, Georgia, 'Times New Roman', serif}
+    .choices{display:flex;flex-direction:column;gap:12px;margin-top:10px}
     .choice{border:1px solid var(--border);border-radius:12px;padding:14px 14px;background:#fbfaf8;cursor:pointer;font-size:16px}
     .choice:hover{background:#f4f1eb}
     .choice.selected{outline:2px solid rgba(47,111,78,.35);border-color:rgba(47,111,78,.55);background:#f2f7f4}
-    .sliderRow{margin-top:22px}
+    .sliderRow{margin-top:18px}
     input[type=range]{width:100%}
-    .rangeLabels{display:flex;justify-content:space-between;color:#444;margin-top:8px;font-size:14px;letter-spacing:.2em}
-    .footerRow{display:flex;justify-content:flex-end;gap:10px;margin-top:22px}
+    .rangeLabels{display:flex;justify-content:space-between;color:#444;margin-top:8px;font-size:14px}
+    .footerRow{display:flex;justify-content:flex-end;gap:10px;margin-top:18px}
     .nextBtn{border:0;border-radius:999px;padding:12px 18px;background:var(--accent);color:#fff;font-weight:650;cursor:pointer}
     .nextBtn.secondary{background:#f3efe7;color:#111;border:1px solid var(--border)}
     .nextBtn:disabled{opacity:.45;cursor:not-allowed;background:#c7c0b6}
 
     .topLine{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:10px}
     .condBadge{font-size:12px;background:#f3efe7;border:1px solid var(--border);border-radius:999px;padding:6px 10px;color:#444}
-    .explainBox{border:1px solid var(--border);border-radius:14px;padding:16px;background:#fbfaf8;font-size:18px;line-height:1.45}
-    .keyLine{margin-top:10px;font-size:16px;color:#333}
-    .keyLine .qLabel{color:#444}
-
-    .recourse{margin-top:14px}
-    .recTitle{font-weight:750;margin:0 0 8px}
-    .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-    .recBtn{border:1px solid var(--border);background:#fff;border-radius:999px;padding:10px 14px;cursor:pointer;font-weight:650}
-    .recBtn:hover{background:#f6f3ee}
-    .recBtn:disabled{opacity:.45;cursor:not-allowed}
+    .explainBox{border:1px solid var(--border);border-radius:14px;padding:16px;background:#fbfaf8;font-size:16px;line-height:1.45}
+    .sectionTitle{font-weight:800;margin:0 0 8px;font-size:15px}
+    .reasonPara{margin:8px 0 0;color:#222}
+    .sigList{margin-top:10px;display:flex;flex-direction:column;gap:8px}
+    .sigItem{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:12px;border:1px solid var(--border);background:#fff}
+    .sigText{font-size:14px;color:#333;line-height:1.35}
+    .sigText.removed{color:#777;text-decoration:line-through}
+    .sigActions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+    .mini{border:1px solid var(--border);background:#fff;border-radius:999px;padding:8px 12px;cursor:pointer;font-weight:650;font-size:13px}
+    .mini:hover{background:#f6f3ee}
+    .mini:disabled{opacity:.45;cursor:not-allowed}
+    .mini.danger{border-color:var(--warnbd);background:var(--warnbg);color:var(--warn)}
 
     .toast{display:none;margin-top:10px;border-radius:12px;padding:10px 12px;font-size:14px}
     .toast.show{display:block}
     .toast.ok{background:var(--okbg);border:1px solid var(--okbd);color:var(--ok)}
     .toast.info{background:var(--infobg);border:1px solid var(--infobd);color:var(--info)}
-    .toast.fade{opacity:0;transition:opacity .35s ease}
-
-    .previewBox{display:none;margin-top:12px;border-radius:14px;border:1px dashed var(--border);background:#fff;padding:14px}
-    .previewBox.show{display:block}
-    .previewTitle{display:flex;justify-content:space-between;align-items:center;gap:10px}
-    .previewTitle h3{margin:0;font-size:16px}
-    .previewActions{display:none;gap:10px;flex-wrap:wrap;margin-top:10px}
-    .previewActions.show{display:flex}
-    .hint{font-size:12px;color:#666;margin-top:6px}
+    .toast.warn{background:var(--warnbg);border:1px solid var(--warnbd);color:var(--warn)}
 
     .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-top:16px}
     .pCard{border:1px solid var(--border);border-radius:14px;padding:14px;background:#fff;position:relative}
     .pCard.flash{outline:3px solid var(--hi)}
-    .pName{font-weight:750;margin:0 0 6px}
+    .pName{font-weight:800;margin:0 0 6px}
     ul{margin:0;padding-left:18px;color:#444}
     li{margin:6px 0}
 
@@ -95,13 +91,13 @@
     <div class="heroCard">
       <div class="heroTop">
         <span class="tag" id="contextTag">Demo</span>
-        <span class="badge info">v6.6</span>
+        <span class="badge info" id="verBadge">v7.0 (reasoning paragraph + removable signals)</span>
         <h1 id="heroTitle">Recommender</h1>
         <p class="sub" id="heroSub">Discover recommendations based on a short quiz.</p>
       </div>
       <div class="heroBottom">
         <div class="meta">
-          <span class="pill">Flow: landing → quiz → (control slider for B/D) → results</span>
+          <span class="pill">Flow: landing → 5 questions → (weight slider for B/D) → results</span>
           <span class="pill" id="condPill">Condition</span>
         </div>
         <div style="display:flex;gap:10px;flex-wrap:wrap">
@@ -112,6 +108,7 @@
     </div>
   </div>
 
+  <!-- QUIZ -->
   <div class="overlay" id="quizOverlay">
     <div class="modal" role="dialog" aria-modal="true">
       <button class="close" id="quizClose" aria-label="Close">×</button>
@@ -129,22 +126,23 @@
     </div>
   </div>
 
+  <!-- CONTROL -->
   <div class="overlay" id="controlOverlay">
     <div class="modal" role="dialog" aria-modal="true">
       <button class="close" id="controlClose" aria-label="Close">×</button>
       <div class="modalInner">
         <div class="topLine">
-          <div class="modalTitle">Control (Steering)</div>
+          <div class="modalTitle">Weighting</div>
           <div class="condBadge">Confirm</div>
         </div>
         <div class="explainBox">
-          <b>Our system uses your inputs and product details</b> to generate recommendations.
-          <span style="color:var(--accent2);font-weight:650">Adjust the balance, then confirm.</span>
+          <div class="sectionTitle">How should we weight the recommendation sources?</div>
+          Choose the percentage weight between <b>product details</b> and <b>other users’ choices</b>.
         </div>
         <div class="sliderRow">
           <input type="range" min="0" max="100" value="50" id="balanceSlider" />
           <div class="rangeLabels">
-            <span>Your Quiz Input</span><span style="letter-spacing:normal">Balanced</span><span>Product Details<br/>with User Feedback</span>
+            <span>Product details</span><span>Balanced</span><span>Other users’ choices</span>
           </div>
         </div>
         <div class="footerRow">
@@ -154,6 +152,7 @@
     </div>
   </div>
 
+  <!-- RESULTS -->
   <div class="overlay" id="resultsOverlay">
     <div class="modal" role="dialog" aria-modal="true">
       <button class="close" id="resultsClose" aria-label="Close">×</button>
@@ -164,42 +163,33 @@
         </div>
 
         <div class="explainBox">
-          <b>How these recommendations were generated</b><br/>
-          <span id="explainLine"></span>
+          <div class="sectionTitle">How these recommendations were generated</div>
+          <div id="sourceLine"></div>
+          <p class="reasonPara" id="reasonPara"></p>
 
-          <div class="keyLine">
-            <b>Key signal used:</b>
-            <span class="qLabel" id="keySignal"></span>
-            <span class="badge ok" id="reasonState" style="display:none;"></span>
-          </div>
-
-          <div class="recourse" id="recourseBlock">
-            <div class="recTitle">Does this reason fit you?</div>
-            <div class="row">
-              <button class="recBtn" id="reasonYes">Yes, that sounds right</button>
-              <button class="recBtn" id="reasonNo">No, that's not right</button>
+          <div id="recourseBlock" style="margin-top:12px;">
+            <div class="sectionTitle">Does this reasoning fit your preferences?</div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap">
+              <button class="mini" id="reasonYes">Yes, that looks right</button>
+              <button class="mini danger" id="reasonNo">No, please adjust</button>
             </div>
 
-            <div class="previewBox" id="altPreviewBox">
-              <div class="previewTitle">
-                <h3>Alternative option (preview)</h3>
-                <span class="badge info" id="previewBadge">Decision needed</span>
+            <div id="signalEditor" style="display:none;margin-top:12px;">
+              <div class="sectionTitle">Remove any signals you do not want us to use</div>
+              <div class="sigList" id="sigList"></div>
+
+              <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap">
+                <button class="mini" id="applyUpdateBtn">Apply update (refresh recommendations)</button>
+                <button class="mini" id="keepAsIsBtn">Keep current recommendations</button>
               </div>
-
-              <div id="altPreviewCard" style="margin-top:8px"></div>
-
-              <button class="recBtn" id="openDecisionBtn" style="margin-top:10px">Open decision panel</button>
-              <div class="hint" id="openHint">This prevents accidental clicks right after pressing “No”.</div>
-
-              <div class="previewActions" id="decisionActions">
-                <button class="recBtn" id="keepBtn">Keep current recommendations</button>
-                <button class="recBtn" id="switchBtn">Switch to this alternative</button>
+              <div style="font-size:12px;color:#666;margin-top:8px;">
+                Note: Applying the update will remove the selected signals and refresh the list. Keeping will record your decision without changing results.
               </div>
-              <div class="hint" id="decisionHint" style="display:none">Switch requires a second confirmation.</div>
             </div>
 
             <div class="toast ok" id="toastOk"></div>
             <div class="toast info" id="toastInfo"></div>
+            <div class="toast warn" id="toastWarn"></div>
           </div>
         </div>
 
@@ -216,33 +206,37 @@
 
 <script>
 (() => {
-  const VERSION = "v6.6";
+  const VERSION = "v7.0 (reasoning paragraph + removable signals)";
   const $ = (id) => document.getElementById(id);
 
+  // URL params
   const params = new URLSearchParams(location.search);
   const product = (params.get('product') || 'wine').toLowerCase();
   const cond = (params.get('cond') || 'A').toUpperCase();
   const hasControl = (cond === 'B' || cond === 'D');
   const hasRecourse = (cond === 'C' || cond === 'D');
 
+  // Landing labels
   $('contextTag').textContent = (product === 'usb') ? 'USB Match' : 'Wine Match';
   $('heroTitle').textContent  = (product === 'usb') ? 'USB Match' : 'Wine Match';
   $('heroSub').textContent    = (product === 'usb') ? 'Find a USB drive that fits your needs.' : 'Discover your perfect wine pairing.';
-  $('condPill').textContent   = `Condition ${cond} — ${hasControl?'Control ':''}${hasRecourse?'Recourse':''}${(!hasControl && !hasRecourse)?'Explanation-only':''} · ${VERSION}`;
-  $('resultsCondBadge').textContent = `Cond ${cond} (Control ${hasControl?'ON':'OFF'}, Recourse ${hasRecourse?'ON':'OFF'}) · ${VERSION}`;
+  $('condPill').textContent   = `Cond ${cond} · Control ${hasControl?'ON':'OFF'} · Recourse ${hasRecourse?'ON':'OFF'}`;
+  $('resultsCondBadge').textContent = `Cond ${cond} (Control ${hasControl?'ON':'OFF'}, Recourse ${hasRecourse?'ON':'OFF'})`;
 
   $('backBtn').addEventListener('click', ()=> location.href='index.html');
 
+  // Overlays
   const show = (el)=>el.classList.add('show');
   const hide = (el)=>el.classList.remove('show');
   const quizOverlay = $('quizOverlay');
   const controlOverlay = $('controlOverlay');
   const resultsOverlay = $('resultsOverlay');
 
+  // Quiz data (5 questions)
   const wineQuestions = [
-    {type:'choice', q:'What kind of coffee do you like?', options:['Black and strong','Smooth and creamy','Sweet and flavored',"I don’t drink coffee"]},
-    {type:'slider', q:'Will you be sharing with friends, or is it just for you?', left:'With friends', right:'Myself'},
+    {type:'choice', q:'Which taste profile do you generally prefer?', options:['Bold and intense','Smooth and balanced','Light and crisp',"Not sure"]},
     {type:'slider', q:'Do you like wines that feel playful or refined?', left:'Playful', right:'Refined'},
+    {type:'slider', q:'Do you prefer fruit-forward or more structured flavors?', left:'Fruit-forward', right:'Structured'},
     {type:'slider', q:'Are you planning to pair it with food or enjoy it on its own?', left:'With food', right:'On its own'},
     {type:'slider', q:'Are you looking for something refreshing or something cozy?', left:'Refreshing', right:'Cozy'},
   ];
@@ -254,7 +248,7 @@
     {type:'slider', q:'Do you prefer something minimal or something premium?', left:'Minimal', right:'Premium'},
   ];
   const questions = (product === 'usb') ? usbQuestions : wineQuestions;
-  $('quizTitle').textContent = (product === 'usb') ? 'USB Finder Quiz' : 'Wine Pairing Quiz';
+  $('quizTitle').textContent = (product === 'usb') ? 'USB Finder Quiz' : 'Wine Preference Quiz';
 
   let step = 0;
   const answers = Array(questions.length).fill(null);
@@ -300,62 +294,97 @@
     }
   }
 
-  function keySignalText(){
-    if(product === 'usb'){
-      const v = Number(answers[2] ?? 50);
-      const label = (v >= 60) ? 'very important' : (v <= 40 ? 'not important' : 'moderately important');
-      return `“You said transfer speed is ${label}” (${v}/100, from Q: transfer speed)`;
-    } else {
-      const v = Number(answers[4] ?? 50);
-      const label = (v >= 55) ? 'more cozy than refreshing' : (v <= 45 ? 'more refreshing than cozy' : 'slightly in-between');
-      return `“You leaned ${label}” (${v}/100 on refreshing↔cozy, from Q: refreshing vs cozy)`;
-    }
+  // Helpers to convert answer values into short descriptors (signals)
+  function bucket(val, lowLabel, midLabel, highLabel) {
+    if(val <= 35) return lowLabel;
+    if(val >= 65) return highLabel;
+    return midLabel;
   }
 
-  $('quizPrev').addEventListener('click', ()=>{ if(step>0){ step--; renderStep(); }});
-  $('quizNext').addEventListener('click', ()=>{
-    const item = questions[step];
-    if(item.type === 'choice' && answers[step] === null){
-      alert('Please select one option to continue.');
-      return;
+  function buildSignals(){
+    // Return an array of signal objects: {id, label, removed:false}
+    const sigs = [];
+    if(product === 'wine'){
+      const tasteIdx = answers[0];
+      const taste = (tasteIdx===0)?'bold & intense':(tasteIdx===1)?'smooth & balanced':(tasteIdx===2)?'light & crisp':'unspecified';
+      const refined = bucket(Number(answers[1]??50), 'more playful', 'balanced', 'more refined');
+      const structure = bucket(Number(answers[2]??50), 'more fruit-forward', 'balanced', 'more structured');
+      const pairing = bucket(Number(answers[3]??50), 'pairing with food', 'either way', 'enjoying on its own');
+      const temp = bucket(Number(answers[4]??50), 'more refreshing', 'in-between', 'more cozy');
+
+      sigs.push({id:'taste', label:`Taste profile: ${taste} (from Q1)` , removed:false});
+      sigs.push({id:'style', label:`Style: ${refined} (from Q2)` , removed:false});
+      sigs.push({id:'feel', label:`Mood: ${temp} (from Q5)` , removed:false});
+      // Keep extra signal for realism (not all need to be removable, but we make them removable)
+      sigs.push({id:'use', label:`Context: ${pairing} (from Q4)` , removed:false});
+      sigs.push({id:'flavor', label:`Flavor: ${structure} (from Q3)` , removed:false});
+    } else {
+      const useIdx = answers[0];
+      const use = (useIdx===0)?'work files':(useIdx===1)?'photos & videos':(useIdx===2)?'school':'mixed use';
+      const rugged = bucket(Number(answers[1]??50), 'more compact', 'balanced', 'more rugged');
+      const speed = bucket(Number(answers[2]??50), 'speed not important', 'speed moderately important', 'speed very important');
+      const cap = bucket(Number(answers[3]??50), 'more portability', 'balanced', 'more capacity');
+      const premium = bucket(Number(answers[4]??50), 'more minimal', 'balanced', 'more premium');
+
+      sigs.push({id:'use', label:`Primary use: ${use} (from Q1)` , removed:false});
+      sigs.push({id:'form', label:`Form factor: ${rugged} (from Q2)` , removed:false});
+      sigs.push({id:'speed', label:`Preference: ${speed} (from Q3)` , removed:false});
+      sigs.push({id:'capacity', label:`Priority: ${cap} (from Q4)` , removed:false});
+      sigs.push({id:'design', label:`Design: ${premium} (from Q5)` , removed:false});
     }
-    if(step < questions.length - 1){ step++; renderStep(); return; }
-    hide(quizOverlay);
-    if(hasControl) show(controlOverlay);
-    else showResults();
-  });
+    return sigs;
+  }
 
-  $('startBtn').addEventListener('click', ()=>{
-    step=0; for(let i=0;i<answers.length;i++) answers[i]=null;
-    renderStep(); show(quizOverlay);
-  });
+  function sourceWeights(){
+    // For control OFF, default balanced.
+    if(hasControl) {
+      const other = Number($('balanceSlider').value);
+      const prod = 100 - other;
+      return {productDetails: prod, otherUsers: other};
+    }
+    return {productDetails: 50, otherUsers: 50};
+  }
 
-  $('quizClose').addEventListener('click', ()=> hide(quizOverlay));
-  $('controlClose').addEventListener('click', ()=> hide(controlOverlay));
-  $('resultsClose').addEventListener('click', ()=> hide(resultsOverlay));
+  function renderReasonParagraph(sigs){
+    const w = sourceWeights();
+    // Select top 3 non-removed signals for paragraph
+    const active = sigs.filter(s=>!s.removed).slice(0,3);
+    const activeText = active.map(s=>s.label.replace(/\s*\(from.*\)/,'')).join('; ');
+    const mode = hasControl ? `You set the source balance to ${w.productDetails}% product details and ${w.otherUsers}% other users’ choices.` :
+      `We used a balanced mix of ${w.productDetails}% product details and ${w.otherUsers}% other users’ choices.`;
 
+    const para = `Based on your initial survey, we inferred a few key signals about your preferences (e.g., ${activeText}). ${mode} We used these signals to prioritize the recommendations shown below.`;
+    $('reasonPara').textContent = para;
+  }
+
+  // Results data
   const baseWine = [
     {name:'Harmony Red Blend', bullets:['Description: A balanced red blend with ripe berries and a touch of spice.','Style: Smooth and approachable; versatile for many occasions.','Experience: Medium-bodied; great for casual sipping or dinners.']},
-    {name:'Radiance White & Rosé Collection', bullets:['Description: Crisp citrus and soft floral notes with gentle richness.','Style: Light and refreshing; ideal for relaxed evenings.','Experience: Easy-to-drink; pairs nicely with seafood or desserts.']},
-    {name:'Velvet Sparkling Wine', bullets:['Description: Lively and refreshing with a smooth finish.','Style: Bright and approachable; perfect for celebrations.','Experience: Enjoyable on its own or with light meals.']},
+    {name:'Radiance White', bullets:['Description: Crisp citrus and soft floral notes with gentle richness.','Style: Light and refreshing; ideal for relaxed evenings.','Experience: Easy-to-drink; pairs nicely with seafood or light meals.']},
+    {name:'Velvet Sparkling', bullets:['Description: Lively and refreshing with a smooth finish.','Style: Bright and approachable; perfect for celebrations.','Experience: Enjoyable on its own or with light snacks.']},
   ];
   const baseUSB = [
-    {name:'Streamline USB Drive', bullets:['Description: A reliable, everyday option for documents and backups.','Style: Simple, durable design for daily use.','Experience: Plug-and-play; easy to carry.']},
+    {name:'Streamline USB Drive', bullets:['Description: A reliable everyday option for documents and backups.','Style: Simple, durable design for daily use.','Experience: Plug-and-play; easy to carry.']},
     {name:'BoostSpeed USB Drive', bullets:['Description: A performance-focused option for faster transfers.','Style: Modern, compact profile.','Experience: Good for moving large files.']},
     {name:'VaultGuard USB Drive', bullets:['Description: A security-oriented option for sensitive files.','Style: Professional look and feel.','Experience: Designed for peace of mind.']},
   ];
 
-  const altWineTop = {name:'Citrus Breeze White', bullets:['Description: Suggested after your correction to better match your preference.','Style: Bright and easy-going.','Experience: Great for casual sipping and light foods.'], badge:'Updated after your correction', badgeType:'info'};
-  const altUSBTop  = {name:'FlexFit USB Drive', bullets:['Description: Suggested after your correction to better match your needs.','Style: Lightweight and versatile.','Experience: A good all-purpose choice.'], badge:'Updated after your correction', badgeType:'info'};
-
-  const altWineAlt = {name:'Cozy Orchard Rosé', bullets:['Description: An alternative option you can choose to switch to.','Style: Soft and comforting; gentle fruit notes.','Experience: Easy to enjoy in relaxed settings.'], badge:'Alternative (preview)', badgeType:'info'};
-  const altUSBAlt  = {name:'PocketPro USB Drive', bullets:['Description: An alternative option you can choose to switch to.','Style: Compact and minimal.','Experience: Convenient for everyday carry.'], badge:'Alternative (preview)', badgeType:'info'};
+  const altWine = [
+    {name:'Citrus Breeze White', bullets:['Description: A lighter, brighter option after removing a signal.','Style: Crisp and easy-going.','Experience: Great for casual sipping and light foods.'], badge:'Updated after your correction', badgeType:'info'},
+    {name:'Cozy Orchard Rosé', bullets:['Description: A softer, comfort-forward option after removing a signal.','Style: Gentle fruit notes; smooth finish.','Experience: Easy to enjoy in relaxed settings.'], badge:'Updated after your correction', badgeType:'info'},
+    {name:'Oak & Spice Red', bullets:['Description: A structured red-forward option after removing a signal.','Style: More depth and spice.','Experience: Fits hearty meals and longer sipping.'], badge:'Updated after your correction', badgeType:'info'},
+  ];
+  const altUSB = [
+    {name:'FlexFit USB Drive', bullets:['Description: A versatile option after removing a signal.','Style: Lightweight and flexible.','Experience: Good all-purpose choice.'], badge:'Updated after your correction', badgeType:'info'},
+    {name:'RuggedMax USB Drive', bullets:['Description: A tougher option after removing a signal.','Style: More rugged build.','Experience: Better for travel and daily wear.'], badge:'Updated after your correction', badgeType:'info'},
+    {name:'MiniLite USB Drive', bullets:['Description: A compact option after removing a signal.','Style: Minimal design.','Experience: Easy to carry everywhere.'], badge:'Updated after your correction', badgeType:'info'},
+  ];
 
   let items = [];
-  let reasonAnswered = false;
-  let contestUsed = false;
-  let decisionMade = false;
-  let switchArmed = false;
+  let signals = [];
+  let voiceAnswered = false;
+  let adjustOpened = false;
+  let decisionRecorded = false;
 
   function renderCards(flashIndex=null){
     const cards = $('cards');
@@ -363,7 +392,7 @@
     items.forEach((it, idx)=>{
       const c = document.createElement('div');
       c.className = 'pCard' + ((flashIndex===idx)?' flash':'');
-      const badgeClass = it.badgeType === 'ok' ? 'badge ok' : (it.badgeType === 'info' ? 'badge info' : 'badge');
+      const badgeClass = it.badgeType === 'info' ? 'badge info' : (it.badgeType === 'ok' ? 'badge ok' : 'badge');
       const badge = it.badge ? `<span class="${badgeClass}">${it.badge}</span>` : '';
       c.innerHTML = `<div class="pName">${it.name} ${badge}</div><ul>${it.bullets.map(b=>`<li>${b}</li>`).join('')}</ul>`;
       cards.appendChild(c);
@@ -371,203 +400,82 @@
     });
   }
 
-  function clearToasts(){
-    $('toastOk').classList.remove('show','fade'); $('toastOk').textContent='';
-    $('toastInfo').classList.remove('show','fade'); $('toastInfo').textContent='';
-  }
-
-  function toast(el, msg){
-    el.classList.remove('fade');
+  function toast(which, msg){
+    const el = which==='ok' ? $('toastOk') : which==='warn' ? $('toastWarn') : $('toastInfo');
     el.textContent = msg;
     el.classList.add('show');
-    setTimeout(()=>el.classList.add('fade'), 2400);
-    setTimeout(()=>{ el.classList.remove('show'); el.classList.remove('fade'); }, 2900);
+    setTimeout(()=>{ el.classList.remove('show'); }, 2600);
   }
 
-  function setPreviewVisible(on){
-    const box = $('altPreviewBox');
-    if(on) box.classList.add('show'); else box.classList.remove('show');
+  function resetRecourseUI(){
+    $('recourseBlock').style.display = hasRecourse ? 'block' : 'none';
+    $('signalEditor').style.display = 'none';
+    $('reasonYes').disabled = false;
+    $('reasonNo').disabled = false;
+    $('applyUpdateBtn').disabled = true;
+    $('keepAsIsBtn').disabled = true;
+
+    voiceAnswered = false;
+    adjustOpened = false;
+    decisionRecorded = false;
+
+    $('finishBtn').disabled = hasRecourse; // must answer in recourse conditions
+    if(!hasRecourse) $('finishBtn').disabled = false;
   }
 
-  function renderPreviewCard(alt){
-    const host = $('altPreviewCard');
-    const badge = `<span class="badge info">${alt.badge}</span>`;
-    host.innerHTML = `<div class="pName">${alt.name} ${badge}</div><ul>${alt.bullets.map(b=>`<li>${b}</li>`).join('')}</ul>`;
+  function renderSignalEditor(){
+    const list = $('sigList');
+    list.innerHTML = '';
+    signals.forEach(sig=>{
+      const row = document.createElement('div');
+      row.className = 'sigItem';
+      const txt = document.createElement('div');
+      txt.className = 'sigText' + (sig.removed ? ' removed' : '');
+      txt.textContent = sig.label;
+      const actions = document.createElement('div');
+      actions.className = 'sigActions';
+
+      const btn = document.createElement('button');
+      btn.className = 'mini danger';
+      btn.textContent = sig.removed ? 'Removed' : 'Remove';
+      btn.disabled = sig.removed;
+
+      btn.addEventListener('click', ()=>{
+        sig.removed = true;
+        renderSignalEditor();
+        renderReasonParagraph(signals);
+        // enable apply + keep once at least one removal exists
+        const anyRemoved = signals.some(s=>s.removed);
+        $('applyUpdateBtn').disabled = !anyRemoved;
+        $('keepAsIsBtn').disabled = false;
+      });
+
+      actions.appendChild(btn);
+      row.appendChild(txt);
+      row.appendChild(actions);
+      list.appendChild(row);
+    });
   }
 
-  function resetDecisionPanel(){
-    $('decisionActions').classList.remove('show');
-    $('decisionHint').style.display = 'none';
-    $('openDecisionBtn').disabled = false;
-    $('openDecisionBtn').textContent = 'Open decision panel';
-
-    $('keepBtn').disabled = true;
-    $('switchBtn').disabled = true;
-    $('switchBtn').textContent = 'Switch to this alternative';
-    switchArmed = false;
-  }
-
-  function resetResults(){
-    clearToasts();
-    setPreviewVisible(false);
-    $('previewBadge').textContent = 'Decision needed';
-    $('reasonState').style.display = 'none';
-    $('reasonState').textContent = '';
+  function showResults(){
+    $('resultsTitle').textContent = ((product === 'usb') ? 'USB Recommendations' : 'Wine Recommendations');
+    const w = sourceWeights();
+    $('sourceLine').textContent = hasControl
+      ? `Source weighting (you set): ${w.productDetails}% product details vs ${w.otherUsers}% other users’ choices.`
+      : `Source weighting: ${w.productDetails}% product details vs ${w.otherUsers}% other users’ choices (default).`;
 
     items = JSON.parse(JSON.stringify((product==='usb')?baseUSB:baseWine));
     renderCards();
 
-    reasonAnswered = false;
-    contestUsed = false;
-    decisionMade = false;
-    resetDecisionPanel();
+    signals = buildSignals();
+    renderReasonParagraph(signals);
 
-    $('reasonYes').disabled = false;
-    $('reasonNo').disabled  = false;
-
-    $('finishBtn').disabled = hasRecourse;
-    if(!hasRecourse) $('finishBtn').disabled = false;
-  }
-
-  function showResults(){
-    $('resultsTitle').textContent = ((product === 'usb') ? 'USB Recommendations' : 'Wine Recommendations') + ` · ${VERSION}`;
-    $('explainLine').textContent = hasControl
-      ? `Our system uses ${Number($('balanceSlider').value)}% of your inputs and ${100-Number($('balanceSlider').value)}% of product details with user feedback to generate the recommendations for you.`
-      : 'Our system uses 50% of your inputs and 50% of product details with user feedback to generate the recommendations for you.';
-    $('keySignal').textContent = keySignalText();
-    $('recourseBlock').style.display = hasRecourse ? 'block' : 'none';
-
-    resetResults();
+    resetRecourseUI();
     show(resultsOverlay);
   }
 
-  $('controlConfirm').addEventListener('click', ()=>{ hide(controlOverlay); showResults(); });
-
-  $('reasonYes').addEventListener('click', ()=>{
-    if(!hasRecourse || reasonAnswered) return;
-    reasonAnswered = true;
-    contestUsed = false;
-    decisionMade = true;
-
-    clearToasts();
-    $('reasonYes').disabled = true;
-    $('reasonNo').disabled  = true;
-
-    $('reasonState').style.display = 'inline-block';
-    $('reasonState').textContent = 'Confirmed';
-
-    toast($('toastOk'), 'Thanks—confirmed. We will keep using this signal.');
-    $('finishBtn').disabled = false;
-  });
-
-  $('reasonNo').addEventListener('click', ()=>{
-    if(!hasRecourse || reasonAnswered) return;
-    reasonAnswered = true;
-    contestUsed = true;
-    decisionMade = false;
-    resetDecisionPanel();
-
-    clearToasts();
-    $('reasonYes').disabled = true;
-    $('reasonNo').disabled  = true;
-    $('finishBtn').disabled = true;
-
-    $('reasonState').style.display = 'inline-block';
-    $('reasonState').textContent = 'Removed';
-
-    const repTop = (product==='usb') ? altUSBTop : altWineTop;
-    items[0] = JSON.parse(JSON.stringify(repTop));
-    renderCards(0);
-
-    $('keySignal').textContent = $('keySignal').textContent + ' (removed at your request)';
-    toast($('toastOk'), 'Applied. We removed that signal and refreshed your recommendations.');
-
-    const alt = (product==='usb') ? altUSBAlt : altWineAlt;
-    renderPreviewCard(alt);
-    setPreviewVisible(true);
-    $('previewBadge').textContent = 'Please choose';
-  });
-
-  $('openDecisionBtn').addEventListener('click', ()=>{
-    if(!hasRecourse || !contestUsed || decisionMade) return;
-
-    $('decisionActions').classList.add('show');
-    $('decisionHint').style.display = 'block';
-    $('openDecisionBtn').disabled = true;
-    $('openDecisionBtn').textContent = 'Decision panel opened';
-
-    $('keepBtn').disabled = true;
-    $('switchBtn').disabled = true;
-
-    const unlockAt = performance.now() + 900;
-    const unlockLoop = ()=>{
-      if(performance.now() >= unlockAt){
-        $('keepBtn').disabled = false;
-        $('switchBtn').disabled = false;
-        return;
-      }
-      requestAnimationFrame(unlockLoop);
-    };
-    requestAnimationFrame(unlockLoop);
-  });
-
-  $('keepBtn').addEventListener('click', ()=>{
-    if(!hasRecourse || !contestUsed || decisionMade) return;
-    decisionMade = true;
-    $('previewBadge').textContent = 'Decision recorded';
-    $('keepBtn').disabled = true;
-    $('switchBtn').disabled = true;
-    toast($('toastInfo'), 'Decision recorded. Keeping the current recommendations.');
-    $('finishBtn').disabled = false;
-  });
-
-  $('switchBtn').addEventListener('click', ()=>{
-    if(!hasRecourse || !contestUsed || decisionMade) return;
-
-    if(!switchArmed){
-      switchArmed = true;
-      $('previewBadge').textContent = 'Confirm switch';
-      $('switchBtn').textContent = 'Confirm switch';
-      toast($('toastInfo'), 'Click “Confirm switch” once more to apply.');
-      return;
-    }
-
-    decisionMade = true;
-    $('previewBadge').textContent = 'Decision recorded';
-    $('keepBtn').disabled = true;
-    $('switchBtn').disabled = true;
-
-    const alt = (product==='usb') ? altUSBAlt : altWineAlt;
-    const applied = JSON.parse(JSON.stringify(alt));
-    applied.badge = 'Updated after your feedback';
-    applied.badgeType = 'ok';
-    items[2] = applied;
-    renderCards(2);
-
-    toast($('toastInfo'), 'Applied. We switched to the alternative.');
-    $('finishBtn').disabled = false;
-  });
-
-  $('restartBtn').addEventListener('click', ()=>{
-    hide(resultsOverlay);
-    step=0; for(let i=0;i<answers.length;i++) answers[i]=null;
-    renderStep(); show(quizOverlay);
-  });
-
-  $('finishBtn').addEventListener('click', ()=>{
-    const payload = {
-      version: VERSION, product, cond,
-      control: hasControl, recourse: hasRecourse,
-      quizAnswers: answers,
-      sliderBalance: hasControl ? Number($('balanceSlider').value) : null,
-      contestUsed: hasRecourse ? contestUsed : null,
-      decisionMade: hasRecourse ? decisionMade : null,
-      timestamp: new Date().toISOString()
-    };
-    alert('Demo finished.\n\n' + JSON.stringify(payload, null, 2));
-  });
-
-  $('quizPrev').addEventListener('click', ()=>{ if(step>0){ step--; renderStep(); }});
+  // Quiz navigation
+  $('quizPrev').addEventListener('click', ()=>{ if(step>0){ step--; renderStep(); } });
   $('quizNext').addEventListener('click', ()=>{
     const item = questions[step];
     if(item.type === 'choice' && answers[step] === null){
@@ -580,6 +488,108 @@
     else showResults();
   });
 
+  // Start
+  $('startBtn').addEventListener('click', ()=>{
+    step=0;
+    for(let i=0;i<answers.length;i++) answers[i]=null;
+    renderStep();
+    show(quizOverlay);
+  });
+
+  $('quizClose').addEventListener('click', ()=> hide(quizOverlay));
+  $('controlClose').addEventListener('click', ()=> hide(controlOverlay));
+  $('resultsClose').addEventListener('click', ()=> hide(resultsOverlay));
+
+  $('controlConfirm').addEventListener('click', ()=>{ hide(controlOverlay); showResults(); });
+
+  // Recourse: Voice
+  $('reasonYes').addEventListener('click', ()=>{
+    if(!hasRecourse || voiceAnswered) return;
+    voiceAnswered = true;
+    decisionRecorded = true;
+
+    $('reasonYes').disabled = true;
+    $('reasonNo').disabled = true;
+    toast('ok', 'Thanks—confirmed. We will keep using these signals.');
+    $('finishBtn').disabled = false;
+  });
+
+  $('reasonNo').addEventListener('click', ()=>{
+    if(!hasRecourse || voiceAnswered) return;
+    voiceAnswered = true;
+
+    $('reasonYes').disabled = true;
+    $('reasonNo').disabled = true;
+
+    $('signalEditor').style.display = 'block';
+    renderSignalEditor();
+    toast('info', 'You can remove any signals you do not want us to use. Then choose Apply or Keep.');
+    // Keep is enabled once user interacted; apply requires at least one removal.
+    $('keepAsIsBtn').disabled = false;
+  });
+
+  // Recourse: Repair decision
+  $('applyUpdateBtn').addEventListener('click', ()=>{
+    if(!hasRecourse || decisionRecorded) return;
+    const anyRemoved = signals.some(s=>s.removed);
+    if(!anyRemoved){
+      toast('warn', 'Please remove at least one signal to apply an update.');
+      return;
+    }
+    decisionRecorded = true;
+
+    // visibly refresh list: replace top card with an alternative (deterministic pick based on count removed)
+    const removedCount = signals.filter(s=>s.removed).length;
+    const pool = (product==='usb') ? altUSB : altWine;
+    const pick = pool[(removedCount-1) % pool.length];
+    items[0] = JSON.parse(JSON.stringify(pick));
+    renderCards(0);
+
+    toast('ok', 'Applied. We removed the selected signals and refreshed your recommendations.');
+    $('finishBtn').disabled = false;
+
+    // lock UI
+    $('applyUpdateBtn').disabled = true;
+    $('keepAsIsBtn').disabled = true;
+    // disable all remove buttons
+    Array.from(document.querySelectorAll('#sigList button')).forEach(b=>b.disabled=true);
+  });
+
+  $('keepAsIsBtn').addEventListener('click', ()=>{
+    if(!hasRecourse || decisionRecorded) return;
+    decisionRecorded = true;
+    toast('info', 'Decision recorded. Keeping the current recommendations.');
+    $('finishBtn').disabled = false;
+
+    $('applyUpdateBtn').disabled = true;
+    $('keepAsIsBtn').disabled = true;
+    Array.from(document.querySelectorAll('#sigList button')).forEach(b=>b.disabled=true);
+  });
+
+  $('restartBtn').addEventListener('click', ()=>{
+    hide(resultsOverlay);
+    step=0;
+    for(let i=0;i<answers.length;i++) answers[i]=null;
+    renderStep();
+    show(quizOverlay);
+  });
+
+  $('finishBtn').addEventListener('click', ()=>{
+    const w = sourceWeights();
+    const payload = {
+      version: VERSION, product, cond,
+      control: hasControl, recourse: hasRecourse,
+      quizAnswers: answers,
+      sourceWeight_productDetails: w.productDetails,
+      sourceWeight_otherUsers: w.otherUsers,
+      signals: signals,
+      decisionRecorded: hasRecourse ? decisionRecorded : null,
+      timestamp: new Date().toISOString()
+    };
+    alert('Demo finished.\n\n' + JSON.stringify(payload, null, 2));
+  });
+
+  // init
   renderStep();
 })();
 </script>

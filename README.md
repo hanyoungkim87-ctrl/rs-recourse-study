@@ -1,13 +1,15 @@
-# RS Recourse Demo — v6.6
+# RS Study Demo — v7.0 (reasoning paragraph + removable signals)
 
-Purpose: stop accidental “Switch” activation after clicking **No**.
+This build updates the explanation to match:
 
-What changed:
-- After **No**, the preview appears, but keep/switch buttons are hidden behind **Open decision panel**.
-- After opening, buttons unlock after ~0.9s.
-- Switch requires a second confirmation click.
+- Ask 5 questions (initial survey)
+- (Control conditions) ask users to set weighting between product details vs other users’ choices
+- Generate a brief paragraph summarizing user inputs + weighting as key signals
+- Ask if the reasoning fits; in Recourse conditions allow users to confirm or remove signals (then Apply update vs Keep)
 
-Deploy:
-Upload `index.html`, `app.html`, `README.md` to repo root.
-Open with `&v=66` to avoid caching.
-Build: 2026-03-10 01:23:36Z (UTC)
+## Deploy on GitHub Pages
+1. Upload `index.html` and `app.html` to the repo root
+2. Settings → Pages → Deploy from a branch → `main` / `(root)`
+3. Open: `index.html` and use links with `&v=70` to avoid caching
+
+Build: 2026-03-24 22:55:01Z (UTC)
