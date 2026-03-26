@@ -126,6 +126,21 @@
 
     /* Prevent accidental body scroll jump on iOS */
     html, body{height:100%}
+
+
+    /* Control (source-weighting) modal: make it feel like a system setting (not another quiz item) */
+    #controlOverlay .modal{border-color:var(--infobd)}
+    #controlOverlay .modalTitle{
+      display:flex;align-items:center;justify-content:space-between;gap:10px;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+      font-size:20px;letter-spacing:-.2px;
+      background:var(--infobg);border:1px solid var(--infobd);
+      border-radius:16px;padding:12px 14px;margin:0 0 12px 0;color:#102a57
+    }
+    #controlOverlay .panel{background:#fff;border-color:var(--infobd)}
+    #controlOverlay .nextBtn{background:var(--info);box-shadow:0 10px 22px rgba(42,91,215,.22)}
+    #controlOverlay .nextBtn:hover{filter:brightness(.98)}
+    #controlOverlay .close{border-color:var(--infobd)}
   </style>
 </head>
 <body>
@@ -162,19 +177,24 @@
     <div class="modal" role="dialog" aria-modal="true">
       <button class="close" id="controlClose" aria-label="Close">×</button>
       <div class="modalInner">
-        <div class="modalTitle">Personalization weighting</div>
+        <div class="modalTitle">
+          Recommendation source weighting
+          <span class="badge info" aria-label="Customization settings">Customization</span>
+        </div>
         <div class="panel">
-          <div class="sectionTitle">How should we balance sources?</div>
-          <div class="tiny">Choose the percentage weight between <b>product details</b> and <b>other users’ choices</b>.</div>
+          <div class="tiny">
+            Our system generates recommendations based on your preferences and feedback from other users.
+            You can customize your results by adjusting the balance using the slider below.
+          </div>
           <div class="sliderRow">
             <input type="range" min="0" max="100" value="50" id="balanceSlider" />
             <div class="rangeLabels">
-              <span>Product details</span><span>Balanced</span><span>Other users</span>
+              <span>Product details</span><span>Balanced</span><span>Other users’ choices</span>
             </div>
           </div>
         </div>
         <div class="footerRow" style="justify-content:flex-end">
-          <button class="nextBtn" id="controlConfirm" type="button">Continue</button>
+          <button class="nextBtn" id="controlConfirm" type="button">Confirm</button>
         </div>
       </div>
     </div>
@@ -187,10 +207,14 @@
       <div class="modalInner">
         <div class="modalTitle" id="resultsTitle">Recommended for you</div>
 
-        <!-- Recommendations FIRST -->
-        <div class="cards" id="cards"></div>
-
-        <!-- Explanation + recourse BELOW -->
+        <!--
+          IMPORTANT (manipulation layout)
+          Show the system's explanation + (optional) user options FIRST,
+          then the item list AFTER. This makes the "correction" affordance
+          feel like a post-result right (voice/repair) rather than just
+          another quiz question.
+        -->
+        <!-- Explanation + (optional) recourse FIRST -->
         <div class="section">
           <div class="panel">
             <div class="sectionTitle">Why these recommendations?</div>
@@ -204,7 +228,7 @@
                 <button class="mini danger" id="reasonNo">No</button>
               </div>
 
-              <!-- signal removal UI BELOW recommendations -->
+              <!-- signal removal UI (appears after "No") -->
               <div id="signalEditor" style="display:none;margin-top:14px;">
                 <div class="sectionTitle">Optional: remove signals you don’t want us to use</div>
                 <div class="tiny">You can remove one or more signals below. Then choose <b>Apply update</b> or <b>Keep as is</b>.</div>
@@ -222,6 +246,9 @@
             </div>
           </div>
         </div>
+
+        <!-- Recommendations AFTER the explanation/options -->
+        <div class="cards" id="cards"></div>
 
         <div class="footerRow" style="justify-content:flex-end">
           <button class="nextBtn" id="continueBtn" type="button">Continue</button>
@@ -395,8 +422,24 @@
   }
 
   // Product data with images
-  const imgWine = ['data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2MDAiIGhlaWdodD0iNDIwIiB2aWV3Qm94PSIwIDAgNjAwIDQyMCI+CiAgPHJlY3Qgd2lkdGg9IjYwMCIgaGVpZ2h0PSI0MjAiIHJ4PSIyOCIgZmlsbD0iI2Y2ZjNlZSIvPgogIDxyZWN0IHg9IjQwIiB5PSI0MCIgd2lkdGg9IjUyMCIgaGVpZ2h0PSIzNDAiIHJ4PSIyMiIgZmlsbD0iI2ZmZmZmZiIgc3Ryb2tlPSIjZTZlMGQ2Ii8+CiAgPGcgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMmYyZjJmIiBzdHJva2Utd2lkdGg9IjEwIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPgogICAgPHBhdGggZD0iTTI2MCA5MGg4MCIvPgogICAgPHBhdGggZD0iTTI4NSA5MHY1NWMwIDI1LTMyIDMyLTMyIDYyIDAgNDAgMjggNzQgNDcgOTN2NDZoLTMwIi8+CiAgICA8cGF0aCBkPSJNMzE1IDkwdjU1YzAgMjUgMzIgMzIgMzIgNjIgMCA0MC0yOCA3NC00NyA5M3Y0NmgzMCIvPgogICAgPHBhdGggZD0iTTI3MCAzMzRoNjAiLz4KICAgIDxwYXRoIGQ9Ik0yMjUgMjA1aDE1MCIvPgogIDwvZz4KICA8dGV4dCB4PSIzMDAiIHk9IjM3MCIgZm9udC1mYW1pbHk9InN5c3RlbS11aSwgLWFwcGxlLXN5c3RlbSwgU2Vnb2UgVUksIFJvYm90bywgQXJpYWwiIGZvbnQtc2l6ZT0iMjIiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiM1NTUiPldpbmU8L3RleHQ+Cjwvc3ZnPg==', 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2MDAiIGhlaWdodD0iNDIwIiB2aWV3Qm94PSIwIDAgNjAwIDQyMCI+CiAgPHJlY3Qgd2lkdGg9IjYwMCIgaGVpZ2h0PSI0MjAiIHJ4PSIyOCIgZmlsbD0iI2Y2ZjNlZSIvPgogIDxyZWN0IHg9IjQwIiB5PSI0MCIgd2lkdGg9IjUyMCIgaGVpZ2h0PSIzNDAiIHJ4PSIyMiIgZmlsbD0iI2ZmZmZmZiIgc3Ryb2tlPSIjZTZlMGQ2Ii8+CiAgPGcgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMmYyZjJmIiBzdHJva2Utd2lkdGg9IjEwIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPgogICAgPHBhdGggZD0iTTI2MCA5Mmg4MCIvPgogICAgPHBhdGggZD0iTTI3MCA5MmMwIDQwIDIwIDYyIDMwIDkwIDEwIDI4IDEwIDU0IDAgODItMTAgMjgtMzAgNTAtMzAgOTAiLz4KICAgIDxwYXRoIGQ9Ik0zMzAgOTJjMCA0MC0yMCA2Mi0zMCA5MC0xMCAyOC0xMCA1NCAwIDgyIDEwIDI4IDMwIDUwIDMwIDkwIi8+CiAgICA8cGF0aCBkPSJNMjU1IDMzMmg5MCIvPgogICAgPHBhdGggZD0iTTIzMCAyMjBoMTQwIi8+CiAgPC9nPgogIDx0ZXh0IHg9IjMwMCIgeT0iMzcwIiBmb250LWZhbWlseT0ic3lzdGVtLXVpLCAtYXBwbGUtc3lzdGVtLCBTZWdvZSBVSSwgUm9ib3RvLCBBcmlhbCIgZm9udC1zaXplPSIyMiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzU1NSI+V2luZTwvdGV4dD4KPC9zdmc+', 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2MDAiIGhlaWdodD0iNDIwIiB2aWV3Qm94PSIwIDAgNjAwIDQyMCI+CiAgPHJlY3Qgd2lkdGg9IjYwMCIgaGVpZ2h0PSI0MjAiIHJ4PSIyOCIgZmlsbD0iI2Y2ZjNlZSIvPgogIDxyZWN0IHg9IjQwIiB5PSI0MCIgd2lkdGg9IjUyMCIgaGVpZ2h0PSIzNDAiIHJ4PSIyMiIgZmlsbD0iI2ZmZmZmZiIgc3Ryb2tlPSIjZTZlMGQ2Ii8+CiAgPGcgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMmYyZjJmIiBzdHJva2Utd2lkdGg9IjEwIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPgogICAgPHBhdGggZD0iTTI2MCA5MGg4MCIvPgogICAgPHBhdGggZD0iTTI5MCA5MHY3MGMwIDE4LTQyIDE4LTQyIDYwIDAgNjAgNTQgOTIgNTQgOTJ2NDBoLTM0Ii8+CiAgICA8cGF0aCBkPSJNMzEwIDkwdjcwYzAgMTggNDIgMTggNDIgNjAgMCA2MC01NCA5Mi01NCA5MnY0MGgzNCIvPgogICAgPHBhdGggZD0iTTI2MCAzMzVoODAiLz4KICAgIDxwYXRoIGQ9Ik0yNDAgMTk1aDEyMCIvPgogIDwvZz4KICA8dGV4dCB4PSIzMDAiIHk9IjM3MCIgZm9udC1mYW1pbHk9InN5c3RlbS11aSwgLWFwcGxlLXN5c3RlbSwgU2Vnb2UgVUksIFJvYm90bywgQXJpYWwiIGZvbnQtc2l6ZT0iMjIiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiM1NTUiPldpbmU8L3RleHQ+Cjwvc3ZnPg=='];
-  const imgUSB  = ['data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2MDAiIGhlaWdodD0iNDIwIiB2aWV3Qm94PSIwIDAgNjAwIDQyMCI+CiAgPHJlY3Qgd2lkdGg9IjYwMCIgaGVpZ2h0PSI0MjAiIHJ4PSIyOCIgZmlsbD0iI2Y2ZjNlZSIvPgogIDxyZWN0IHg9IjQwIiB5PSI0MCIgd2lkdGg9IjUyMCIgaGVpZ2h0PSIzNDAiIHJ4PSIyMiIgZmlsbD0iI2ZmZmZmZiIgc3Ryb2tlPSIjZTZlMGQ2Ii8+CiAgPGcgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMmYyZjJmIiBzdHJva2Utd2lkdGg9IjEwIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPgogICAgPHJlY3QgeD0iMTcwIiB5PSIxNTAiIHdpZHRoPSIyNjAiIGhlaWdodD0iMTQwIiByeD0iMjQiLz4KICAgIDxwYXRoIGQ9Ik0yNDAgMTUwdi0zNWgxMjB2MzUiLz4KICAgIDxwYXRoIGQ9Ik0yNTAgMjEwaDEwMCIvPgogICAgPHBhdGggZD0iTTIwNSAyMDV2MzAiLz4KICAgIDxwYXRoIGQ9Ik0zOTUgMjA1djMwIi8+CiAgPC9nPgogIDx0ZXh0IHg9IjMwMCIgeT0iMzcwIiBmb250LWZhbWlseT0ic3lzdGVtLXVpLCAtYXBwbGUtc3lzdGVtLCBTZWdvZSBVSSwgUm9ib3RvLCBBcmlhbCIgZm9udC1zaXplPSIyMiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzU1NSI+VVNCIERyaXZlPC90ZXh0Pgo8L3N2Zz4=', 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2MDAiIGhlaWdodD0iNDIwIiB2aWV3Qm94PSIwIDAgNjAwIDQyMCI+CiAgPHJlY3Qgd2lkdGg9IjYwMCIgaGVpZ2h0PSI0MjAiIHJ4PSIyOCIgZmlsbD0iI2Y2ZjNlZSIvPgogIDxyZWN0IHg9IjQwIiB5PSI0MCIgd2lkdGg9IjUyMCIgaGVpZ2h0PSIzNDAiIHJ4PSIyMiIgZmlsbD0iI2ZmZmZmZiIgc3Ryb2tlPSIjZTZlMGQ2Ii8+CiAgPGcgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMmYyZjJmIiBzdHJva2Utd2lkdGg9IjEwIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPgogICAgPHJlY3QgeD0iMTgwIiB5PSIxNTAiIHdpZHRoPSIyNDAiIGhlaWdodD0iMTQwIiByeD0iMjQiLz4KICAgIDxwYXRoIGQ9Ik0yNTAgMTUwdi0zNWgxMDB2MzUiLz4KICAgIDxwYXRoIGQ9Ik0yNDAgMjIwaDEyMCIvPgogICAgPHBhdGggZD0iTTIxNSAyMDV2MzAiLz4KICAgIDxwYXRoIGQ9Ik0zODUgMjA1djMwIi8+CiAgPC9nPgogIDx0ZXh0IHg9IjMwMCIgeT0iMzcwIiBmb250LWZhbWlseT0ic3lzdGVtLXVpLCAtYXBwbGUtc3lzdGVtLCBTZWdvZSBVSSwgUm9ib3RvLCBBcmlhbCIgZm9udC1zaXplPSIyMiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzU1NSI+VVNCIERyaXZlPC90ZXh0Pgo8L3N2Zz4=', 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2MDAiIGhlaWdodD0iNDIwIiB2aWV3Qm94PSIwIDAgNjAwIDQyMCI+CiAgPHJlY3Qgd2lkdGg9IjYwMCIgaGVpZ2h0PSI0MjAiIHJ4PSIyOCIgZmlsbD0iI2Y2ZjNlZSIvPgogIDxyZWN0IHg9IjQwIiB5PSI0MCIgd2lkdGg9IjUyMCIgaGVpZ2h0PSIzNDAiIHJ4PSIyMiIgZmlsbD0iI2ZmZmZmZiIgc3Ryb2tlPSIjZTZlMGQ2Ii8+CiAgPGcgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMmYyZjJmIiBzdHJva2Utd2lkdGg9IjEwIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPgogICAgPHJlY3QgeD0iMTYwIiB5PSIxNTAiIHdpZHRoPSIyODAiIGhlaWdodD0iMTQwIiByeD0iMjQiLz4KICAgIDxwYXRoIGQ9Ik0yNDAgMTUwdi0zNWgxMjB2MzUiLz4KICAgIDxwYXRoIGQ9Ik0yNTAgMjEwaDEwMCIvPgogICAgPHBhdGggZD0iTTIwNSAyMDV2MzAiLz4KICAgIDxwYXRoIGQ9Ik0zOTUgMjA1djMwIi8+CiAgPC9nPgogIDx0ZXh0IHg9IjMwMCIgeT0iMzcwIiBmb250LWZhbWlseT0ic3lzdGVtLXVpLCAtYXBwbGUtc3lzdGVtLCBTZWdvZSBVSSwgUm9ib3RvLCBBcmlhbCIgZm9udC1zaXplPSIyMiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzU1NSI+VVNCIERyaXZlPC90ZXh0Pgo8L3N2Zz4='];
+  // Local, lightweight images (no external network requests).
+  // Included in the repo under /assets/img.
+  const imgWine = [
+    'assets/img/wine_red.jpg',
+    'assets/img/wine_white.jpg',
+    'assets/img/wine_sparkling.jpg',
+    'assets/img/wine_citrus.jpg',
+    'assets/img/wine_rose.jpg',
+    'assets/img/wine_oak.jpg'
+  ];
+  const imgUSB  = [
+    'assets/img/usb_slim.jpg',
+    'assets/img/usb_rugged.jpg',
+    'assets/img/usb_mini.jpg',
+    'assets/img/usb_flex.jpg',
+    'assets/img/usb_ruggedmax.jpg',
+    'assets/img/usb_minilite.jpg'
+  ];
 
   const baseWine = [
     {name:'Harmony Red Blend', img: imgWine[0], bullets:['Balanced red with ripe berries and a touch of spice.','Smooth, approachable style.','Good for dinners and casual sipping.']},
@@ -410,14 +453,14 @@
   ];
 
   const altWine = [
-    {name:'Citrus Breeze White', img: imgWine[1], bullets:['A lighter, brighter option after removing a signal.','Crisp and easy-going.','Great for casual sipping.'], badge:'Updated', badgeType:'info'},
-    {name:'Cozy Orchard Rosé', img: imgWine[2], bullets:['A softer, comfort-forward option after removing a signal.','Gentle fruit notes.','Easy to enjoy in relaxed settings.'], badge:'Updated', badgeType:'info'},
-    {name:'Oak & Spice Red', img: imgWine[0], bullets:['A structured red-forward option after removing a signal.','More depth and spice.','Fits hearty meals.'], badge:'Updated', badgeType:'info'},
+    {name:'Citrus Breeze White', img: imgWine[3], bullets:['A lighter, brighter option after removing a signal.','Crisp and easy-going.','Great for casual sipping.'], badge:'Updated', badgeType:'info'},
+    {name:'Cozy Orchard Rosé', img: imgWine[4], bullets:['A softer, comfort-forward option after removing a signal.','Gentle fruit notes.','Easy to enjoy in relaxed settings.'], badge:'Updated', badgeType:'info'},
+    {name:'Oak & Spice Red', img: imgWine[5], bullets:['A structured red-forward option after removing a signal.','More depth and spice.','Fits hearty meals.'], badge:'Updated', badgeType:'info'},
   ];
   const altUSB = [
-    {name:'FlexFit USB Drive', img: imgUSB[2], bullets:['A versatile option after removing a signal.','Lightweight and flexible.','Good all-purpose choice.'], badge:'Updated', badgeType:'info'},
-    {name:'RuggedMax USB Drive', img: imgUSB[0], bullets:['A tougher option after removing a signal.','More rugged build.','Better for travel and wear.'], badge:'Updated', badgeType:'info'},
-    {name:'MiniLite USB Drive', img: imgUSB[1], bullets:['A compact option after removing a signal.','Minimal design.','Convenient for everyday carry.'], badge:'Updated', badgeType:'info'},
+    {name:'FlexFit USB Drive', img: imgUSB[3], bullets:['A versatile option after removing a signal.','Lightweight and flexible.','Good all-purpose choice.'], badge:'Updated', badgeType:'info'},
+    {name:'RuggedMax USB Drive', img: imgUSB[4], bullets:['A tougher option after removing a signal.','More rugged build.','Better for travel and wear.'], badge:'Updated', badgeType:'info'},
+    {name:'MiniLite USB Drive', img: imgUSB[5], bullets:['A compact option after removing a signal.','Minimal design.','Convenient for everyday carry.'], badge:'Updated', badgeType:'info'},
   ];
 
   let items = [];
