@@ -94,7 +94,7 @@
     .pCard{border:1px solid var(--border);border-radius:14px;padding:12px;background:#fff;position:relative;display:flex;gap:10px}
     .pCard.flash{outline:3px solid var(--hi)}
     .imgWrap{flex:0 0 84px}
-    .imgWrap img{width:84px;height:60px;object-fit:cover;border-radius:12px;border:1px solid var(--border);background:#fff}
+    .imgWrap img{width:84px;height:60px;object-fit:contain;border-radius:12px;border:1px solid var(--border);background:#fff}
     .pBody{flex:1}
     .pName{font-weight:850;margin:0 0 6px;font-size:15px}
     .badge{display:inline-block;font-size:12px;border:1px solid var(--border);border-radius:999px;padding:3px 8px;margin-left:6px;color:#444;background:#f3efe7;vertical-align:middle}
@@ -189,7 +189,7 @@
           <div class="sliderRow">
             <input type="range" min="0" max="100" value="50" id="balanceSlider" />
             <div class="rangeLabels">
-              <span>Product details</span><span>Balanced</span><span>Other users’ choices</span>
+              <span>Your preferences</span><span>Balanced</span><span>Other users’ choices</span>
             </div>
           </div>
         </div>
@@ -222,10 +222,11 @@
             <p class="reasonPara" id="reasonPara"></p>
 
             <div id="recourseBlock" style="margin-top:12px; display:none;">
-              <div class="sectionTitle" style="margin-top:14px">Does this explanation look right to you?</div>
-              <div class="row">
-                <button class="mini" id="reasonYes">Yes</button>
-                <button class="mini danger" id="reasonNo">No</button>
+              <div class="sectionTitle" style="margin-top:14px">Does this explanation accurately reflect your preferences?</div>
+              <div class="tiny">If anything is incorrect or missing, you can correct it and update your recommendations.</div>
+              <div class="row" style="margin-top:10px;">
+                <button class="mini" id="reasonYes">Yes, it looks right</button>
+                <button class="mini danger" id="reasonNo">No, I want to correct it</button>
               </div>
 
               <!-- signal removal UI (appears after "No") -->
@@ -260,7 +261,6 @@
   <!-- DONE -->
   <div class="overlay" id="doneOverlay">
     <div class="modal" role="dialog" aria-modal="true">
-      <button class="close" id="doneClose" aria-label="Close">×</button>
       <div class="modalInner">
         <div class="modalTitle">All set</div>
         <div class="panel">
@@ -268,9 +268,9 @@
           <div class="tiny" style="margin-top:10px;">
             If this page was opened from a survey link with a return URL, you will be redirected automatically.
           </div>
-        </div>
-        <div class="footerRow" style="justify-content:flex-end">
-          <button class="nextBtn" id="doneOk" type="button">OK</button>
+          <div class="tiny" style="margin-top:10px;">
+            If not, you can close this tab and return to your survey window.
+          </div>
         </div>
       </div>
     </div>
@@ -416,8 +416,8 @@
     const active = sigs.filter(s=>!s.removed).slice(0,3);
     const activeText = active.map(s=>s.label.replace(/\s*\(Q\d\)/,'')).join('; ');
     const mode = hasControl
-      ? `You set the source balance to ${w.productDetails}% product details and ${w.otherUsers}% other users’ choices.`
-      : `We used a balanced mix of ${w.productDetails}% product details and ${w.otherUsers}% other users’ choices.`;
+      ? `You set the source balance to ${w.productDetails}% your preferences and ${w.otherUsers}% other users’ choices.`
+      : `We used a balanced mix of ${w.productDetails}% your preferences and ${w.otherUsers}% other users’ choices.`;
     $('reasonPara').textContent = `Based on your answers, we inferred a few signals about your preferences (e.g., ${activeText}). ${mode} We used these signals to prioritize the recommendations shown above.`;
   }
 
@@ -542,8 +542,8 @@
     $('resultsTitle').textContent = (product === 'usb') ? 'Recommended USB drives' : 'Recommended wines';
     const w = sourceWeights();
     $('sourceLine').textContent = hasControl
-      ? `Source balance: ${w.productDetails}% product details · ${w.otherUsers}% other users’ choices`
-      : `Source balance: ${w.productDetails}% product details · ${w.otherUsers}% other users’ choices`;
+      ? `Source balance: ${w.productDetails}% your preferences · ${w.otherUsers}% other users’ choices`
+      : `Source balance: ${w.productDetails}% your preferences · ${w.otherUsers}% other users’ choices`;
 
     items = JSON.parse(JSON.stringify((product==='usb')?baseUSB:baseWine));
     renderCards();
@@ -569,10 +569,7 @@
   $('quizClose').addEventListener('click', ()=> hide(quizOverlay));
   $('controlClose').addEventListener('click', ()=> hide(controlOverlay));
   $('resultsClose').addEventListener('click', ()=> hide(resultsOverlay));
-  $('doneClose').addEventListener('click', ()=> hide(doneOverlay));
-  $('doneOk').addEventListener('click', ()=> hide(doneOverlay));
-
-  // Quiz navigation
+      // Quiz navigation
   $('quizPrev').addEventListener('click', ()=>{ if(step>0){ step--; renderStep(); } });
   $('quizNext').addEventListener('click', ()=>{
     const item = questions[step];
