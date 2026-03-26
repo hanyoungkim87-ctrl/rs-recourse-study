@@ -3,53 +3,47 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>RS Study Demo · v7.0 (reasoning paragraph + removable signals)</title>
+  <title>Stimuli Launcher</title>
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
   <style>
     body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;margin:0;background:#fafafa;color:#111}
     .wrap{max-width:980px;margin:40px auto;padding:0 20px}
-    h1{font-size:26px;margin:0 0 8px}
-    p{margin:0 0 14px;color:#333;line-height:1.45}
+    h1{font-size:22px;margin:0 0 8px}
+    p{margin:0 0 14px;color:#444;line-height:1.45}
     .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
     .card{background:#fff;border:1px solid #e6e6e6;border-radius:14px;padding:14px}
-    .card h2{font-size:16px;margin:0 0 10px}
+    .card h2{font-size:14px;margin:0 0 10px;color:#333}
     a{display:block;padding:10px 12px;border-radius:10px;background:#f4f4f4;color:#111;text-decoration:none;margin:8px 0}
     a:hover{background:#ececec}
-    .small{font-size:12px;color:#666;margin-top:16px;line-height:1.45}
+    .small{font-size:12px;color:#777;margin-top:16px}
     code{background:#f1f1f1;padding:2px 6px;border-radius:6px}
-    .badge{display:inline-block;font-size:12px;background:#eef4ff;border:1px solid #d8e6ff;color:#2b4c8a;border-radius:999px;padding:4px 8px;margin-left:8px;vertical-align:middle}
   </style>
 </head>
 <body>
   <div class="wrap">
-    <h1>RS Study Demo <span class="badge">v7.0 (reasoning paragraph + removable signals)</span></h1>
-    <p>
-      Demo build: 2026-03-24 22:55:01Z (UTC). Use <code>&v=70</code> to bust cache.
-      <br/>Params: <code>app.html?product=wine|usb&cond=A|B|C|D&v=70</code>
-    </p>
+    <h1>Stimuli launcher (internal)</h1>
+    <p>Use links below for testing. Add <code>&v=72</code> to avoid caching. Build: 2026-03-26 19:53:59Z UTC.</p>
 
     <div class="grid">
       <div class="card">
         <h2>Wine</h2>
-        <a href="app.html?product=wine&cond=A&v=70">Wine A — Explanation-only</a>
-        <a href="app.html?product=wine&cond=B&v=70">Wine B — Explanation + Control</a>
-        <a href="app.html?product=wine&cond=C&v=70">Wine C — Explanation + Recourse</a>
-        <a href="app.html?product=wine&cond=D&v=70">Wine D — Explanation + Control + Recourse</a>
+        <a href="app.html?product=wine&cond=A&v=72">Wine A</a>
+        <a href="app.html?product=wine&cond=B&v=72">Wine B</a>
+        <a href="app.html?product=wine&cond=C&v=72">Wine C</a>
+        <a href="app.html?product=wine&cond=D&v=72">Wine D</a>
       </div>
       <div class="card">
         <h2>USB</h2>
-        <a href="app.html?product=usb&cond=A&v=70">USB A — Explanation-only</a>
-        <a href="app.html?product=usb&cond=B&v=70">USB B — Explanation + Control</a>
-        <a href="app.html?product=usb&cond=C&v=70">USB C — Explanation + Recourse</a>
-        <a href="app.html?product=usb&cond=D&v=70">USB D — Explanation + Control + Recourse</a>
+        <a href="app.html?product=usb&cond=A&v=72">USB A</a>
+        <a href="app.html?product=usb&cond=B&v=72">USB B</a>
+        <a href="app.html?product=usb&cond=C&v=72">USB C</a>
+        <a href="app.html?product=usb&cond=D&v=72">USB D</a>
       </div>
     </div>
 
-    <div class="small">
-      Note: This build focuses on <b>reasoning as a brief paragraph</b> + <b>removable signals</b> (Recourse conditions).
-    </div>
+    <div class="small">This launcher is not intended for participants.</div>
   </div>
 </body>
 </html>
