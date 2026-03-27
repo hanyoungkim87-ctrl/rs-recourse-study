@@ -1,25 +1,30 @@
-# Experiment-ready stimuli (v72)
+# RS recourse study — profile-based recourse (static demo)
 
-This build is intended to feel like a normal shopping site, not an “experiment stimulus”.
+This folder is a **static** (HTML/CSS/JS) website you can host on GitHub Pages.
 
-Key updates:
-- Removed stimulus-like labels and instruction banners.
-- Results layout reordered: recommendations appear FIRST, recourse UI appears BELOW.
-- Added simple product images (inline SVG data URIs; no external assets).
-- Fixed modal scrolling by enabling overlay + modalInner scrolling and setting max-height.
+## How to run locally
+Open `app.html` in a browser, or run a local server:
 
-## GitHub Pages deploy
-1) Upload `index.html` and `app.html` to repo root
-2) Settings → Pages → Deploy from a branch → main / (root)
-3) Use cache buster: `&v=72`
+```bash
+python3 -m http.server 8000
+# then open http://localhost:8000/app.html
+```
 
-## URLs
-`app.html?product=wine&cond=A&v=72`
-`app.html?product=wine&cond=B&v=72`
-`app.html?product=wine&cond=C&v=72`
-`app.html?product=wine&cond=D&v=72`
+## Conditions (A/B/C/D)
+Use the URL parameter `cond`:
 
-Optional redirect back to a survey:
-`app.html?product=wine&cond=D&v=72&return=https://example.com`
+- `cond=A` → Explanation only
+- `cond=B` → Explanation + Control (source weighting slider)
+- `cond=C` → Explanation + Recourse (profile correction)
+- `cond=D` → Explanation + Control + Recourse
 
-Build: 2026-03-26 19:53:59Z UTC
+Example:
+`app.html?cond=D`
+
+## Replace product images
+Images are placeholders in `assets/img/`. You can replace the files with your own images:
+
+- Keep the same filenames (recommended), **or**
+- Update `catalog` in `assets/js/app.js` to point to your new image paths.
+
+The UI uses `object-fit: contain` so tall images should not be cropped.

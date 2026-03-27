@@ -2,674 +2,194 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Shopping Recommendations</title>
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-  <meta http-equiv="Pragma" content="no-cache" />
-  <meta http-equiv="Expires" content="0" />
-  <style>
-    :root{
-      --bg:#f7f3ea; --ink:#1a1a1a; --muted:#5a5a5a;
-      --card:#ffffff; --border:#e6e0d6;
-      --accent:#2f6f4e; --accent2:#b04a63;
-      --shadow:0 10px 40px rgba(0,0,0,.10);
-      --hi:#fff3b0;
-      --okbg:#f2f7f4; --okbd:rgba(47,111,78,.35); --ok:#1f5a3f;
-      --infobg:#eef4ff; --infobd:#d8e6ff; --info:#2b4c8a;
-      --warnbg:#fff5f5; --warnbd:#ffd7d7; --warn:#a52424;
-    }
-    *{box-sizing:border-box}
-    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink)}
-    .hero{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:36px 16px;background:linear-gradient(180deg, rgba(0,0,0,.03), rgba(0,0,0,0));}
-    .heroCard{width:min(980px, 100%);background:var(--card);border:1px solid var(--border);border-radius:22px;box-shadow:var(--shadow);overflow:hidden;}
-    .heroTop{padding:26px 26px 10px}
-    .brand{display:flex;align-items:center;gap:10px}
-    .dot{width:10px;height:10px;border-radius:999px;background:var(--accent)}
-    h1{margin:12px 0 6px;font-size:38px;letter-spacing:.2px}
-    .sub{margin:0;color:var(--muted);font-size:15px;line-height:1.4}
-    .heroBottom{padding:0 26px 26px;display:flex;gap:12px;align-items:center;justify-content:flex-end;flex-wrap:wrap}
-    .btn{appearance:none;border:0;border-radius:999px;padding:12px 18px;background:var(--accent);color:#fff;font-weight:650;cursor:pointer}
-    .btn:hover{filter:brightness(.95)}
-
-    /* OVERLAYS: scroll fix */
-    .overlay{
-      position:fixed; inset:0; background:rgba(0,0,0,.35);
-      display:none; padding:22px;
-      align-items:flex-start; justify-content:center;
-      overflow-y:auto; -webkit-overflow-scrolling:touch;
-      z-index:50;
-    }
-    .overlay.show{display:flex}
-    .modal{
-      width:min(980px, 100%);
-      background:var(--card);
-      border:1px solid var(--border);
-      border-radius:22px;
-      box-shadow:var(--shadow);
-      position:relative;
-      display:flex;
-      flex-direction:column;
-      max-height:calc(100vh - 44px);
-    }
-    .close{
-      position:absolute; top:14px; right:14px;
-      width:38px; height:38px; border-radius:999px;
-      border:1px solid var(--border);
-      background:#fff; cursor:pointer;
-      font-size:20px; line-height:36px;
-      text-align:center; color:#222;
-      z-index:2;
-    }
-    .modalInner{
-      padding:22px;
-      overflow-y:auto;
-      -webkit-overflow-scrolling:touch;
-    }
-
-    .modalTitle{font-size:24px;margin:0 0 14px;font-weight:800}
-    .step{font-size:13px;color:#666;margin-left:8px}
-
-    /* QUIZ */
-    .q{font-size:20px;margin:0 0 12px;font-weight:750}
-    .choices{display:flex;flex-direction:column;gap:10px;margin-top:8px}
-    .choice{border:1px solid var(--border);border-radius:12px;padding:12px 12px;background:#fbfaf8;cursor:pointer;font-size:15px}
-    .choice:hover{background:#f4f1eb}
-    .choice.selected{outline:2px solid rgba(47,111,78,.35);border-color:rgba(47,111,78,.55);background:#f2f7f4}
-    .sliderRow{margin-top:14px}
-    input[type=range]{width:100%}
-    .rangeLabels{display:flex;justify-content:space-between;color:#444;margin-top:8px;font-size:13px}
-    .footerRow{display:flex;justify-content:space-between;gap:10px;margin-top:16px;flex-wrap:wrap}
-    .nextBtn{border:0;border-radius:999px;padding:12px 18px;background:var(--accent);color:#fff;font-weight:650;cursor:pointer}
-    .nextBtn.secondary{background:#f3efe7;color:#111;border:1px solid var(--border)}
-    .nextBtn:disabled{opacity:.45;cursor:not-allowed;background:#c7c0b6}
-
-    /* RESULTS */
-    .section{margin-top:16px}
-    .sectionTitle{font-weight:850;margin:0 0 8px;font-size:14px;color:#222}
-    .panel{border:1px solid var(--border);border-radius:14px;padding:14px;background:#fbfaf8}
-    .reasonPara{margin:8px 0 0;color:#222;font-size:14px;line-height:1.45}
-    .tiny{font-size:12px;color:#666;line-height:1.4}
-
-    .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-top:12px}
-    .pCard{border:1px solid var(--border);border-radius:14px;padding:12px;background:#fff;position:relative;display:flex;gap:10px}
-    .pCard.flash{outline:3px solid var(--hi)}
-    .imgWrap{flex:0 0 84px}
-    .imgWrap img{width:84px;height:60px;object-fit:contain;border-radius:12px;border:1px solid var(--border);background:#fff}
-    .pBody{flex:1}
-    .pName{font-weight:850;margin:0 0 6px;font-size:15px}
-    .badge{display:inline-block;font-size:12px;border:1px solid var(--border);border-radius:999px;padding:3px 8px;margin-left:6px;color:#444;background:#f3efe7;vertical-align:middle}
-    .badge.info{background:var(--infobg);border-color:var(--infobd);color:var(--info)}
-    ul{margin:0;padding-left:18px;color:#444;font-size:13px}
-    li{margin:6px 0}
-
-    /* Recourse */
-    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-    .mini{border:1px solid var(--border);background:#fff;border-radius:999px;padding:9px 12px;cursor:pointer;font-weight:700;font-size:13px}
-    .mini:hover{background:#f6f3ee}
-    .mini:disabled{opacity:.45;cursor:not-allowed}
-    .mini.danger{border-color:var(--warnbd);background:var(--warnbg);color:var(--warn)}
-
-    .sigList{margin-top:10px;display:flex;flex-direction:column;gap:8px}
-    .sigItem{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:12px;border:1px solid var(--border);background:#fff}
-    .sigText{font-size:13px;color:#333;line-height:1.35}
-    .sigText.removed{color:#777;text-decoration:line-through}
-
-    .toast{display:none;margin-top:10px;border-radius:12px;padding:10px 12px;font-size:13px}
-    .toast.show{display:block}
-    .toast.ok{background:var(--okbg);border:1px solid var(--okbd);color:var(--ok)}
-    .toast.info{background:var(--infobg);border:1px solid var(--infobd);color:var(--info)}
-    .toast.warn{background:var(--warnbg);border:1px solid var(--warnbd);color:var(--warn)}
-
-    /* Small link button */
-    .linkBtn{border:0;background:transparent;color:#234;cursor:pointer;font-weight:700;padding:0}
-    .linkBtn:hover{text-decoration:underline}
-
-    /* Prevent accidental body scroll jump on iOS */
-    html, body{height:100%}
-
-
-    /* Control (source-weighting) modal: make it feel like a system setting (not another quiz item) */
-    #controlOverlay .modal{border-color:var(--infobd)}
-    #controlOverlay .modalTitle{
-      display:flex;align-items:center;justify-content:space-between;gap:10px;
-      font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
-      font-size:20px;letter-spacing:-.2px;
-      background:var(--infobg);border:1px solid var(--infobd);
-      border-radius:16px;padding:12px 14px;margin:0 0 12px 0;color:#102a57
-    }
-    #controlOverlay .panel{background:#fff;border-color:var(--infobd)}
-    #controlOverlay .nextBtn{background:var(--info);box-shadow:0 10px 22px rgba(42,91,215,.22)}
-    #controlOverlay .nextBtn:hover{filter:brightness(.98)}
-    #controlOverlay .close{border-color:var(--infobd)}
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Wine recommendations</title>
+  <link rel="stylesheet" href="assets/css/style.css" />
 </head>
 <body>
-  <div class="hero">
-    <div class="heroCard">
-      <div class="heroTop">
-        <div class="brand"><span class="dot"></span><span id="brandName" style="font-weight:800;color:#2b2b2b">Shop</span></div>
-        <h1 id="heroTitle">Recommendations</h1>
-        <p class="sub" id="heroSub">Answer a few quick questions to get tailored suggestions.</p>
+  <div id="app" class="app">
+    <header class="topbar">
+      <div class="brand">
+        <span class="dot" aria-hidden="true"></span>
+        <span class="brand-title">Wine Shop</span>
       </div>
-      <div class="heroBottom">
-        <button class="btn" id="startBtn" type="button">Start</button>
-      </div>
-    </div>
-  </div>
+    </header>
 
-  <!-- QUIZ -->
-  <div class="overlay" id="quizOverlay">
-    <div class="modal" role="dialog" aria-modal="true">
-      <button class="close" id="quizClose" aria-label="Close">×</button>
-      <div class="modalInner">
-        <div class="modalTitle"><span id="quizTitle">Quick questions</span><span class="step" id="quizProgress">1 / 5</span></div>
-        <div id="quizStepArea"></div>
-        <div class="footerRow">
-          <button class="nextBtn secondary" id="quizPrev" type="button">Back</button>
-          <button class="nextBtn" id="quizNext" type="button">Next</button>
-        </div>
-      </div>
-    </div>
-  </div>
+    <main class="main">
+      <section class="card landing" id="landing">
+        <h1>Wine recommendations</h1>
+        <p class="muted">Answer a few quick questions to get wine suggestions.</p>
 
-  <!-- CONTROL -->
-  <div class="overlay" id="controlOverlay">
-    <div class="modal" role="dialog" aria-modal="true">
-      <button class="close" id="controlClose" aria-label="Close">×</button>
-      <div class="modalInner">
-        <div class="modalTitle">
-          Recommendation source weighting
-          <span class="badge info" aria-label="Customization settings">Customization</span>
+        <div id="condPicker" class="cond-picker hidden" aria-label="Condition picker (for testing only)">
+          <label class="label" for="condSelect">Condition (for testing)</label>
+          <select id="condSelect" class="select">
+            <option value="A">A — Explanation only</option>
+            <option value="B">B — Explanation + Control</option>
+            <option value="C">C — Explanation + Recourse</option>
+            <option value="D" selected>D — Explanation + Control + Recourse</option>
+          </select>
+          <p class="tiny muted">In the experiment, you can hide this by providing <code>cond=A/B/C/D</code> in the URL.</p>
         </div>
-        <div class="panel">
-          <div class="tiny">
-            Our system generates recommendations based on your preferences and feedback from other users.
-            You can customize your results by adjusting the balance using the slider below.
+
+        <div class="actions">
+          <button id="btnStart" class="btn btn-primary">Start</button>
+        </div>
+      </section>
+    </main>
+
+    <!-- Modal backdrop -->
+    <div id="backdrop" class="backdrop hidden" aria-hidden="true"></div>
+
+    <!-- Quiz modal -->
+    <section id="modalQuiz" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="quizTitle">
+      <div class="modal-shell">
+        <div class="modal-header">
+          <h2 id="quizTitle">Quick preference survey</h2>
+          <button class="icon-btn" id="quizClose" aria-label="Close">
+            ×
+          </button>
+        </div>
+
+        <div class="modal-body">
+          <div id="quizProgress" class="progress" aria-label="Progress">
+            <div id="quizProgressBar" class="progress-bar" style="width: 0%"></div>
           </div>
-          <div class="sliderRow">
-            <input type="range" min="0" max="100" value="50" id="balanceSlider" />
-            <div class="rangeLabels">
-              <span>Your preferences</span><span>Balanced</span><span>Other users’ choices</span>
+
+          <div id="quizSteps" class="steps">
+            <!-- injected -->
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button id="quizBack" class="btn btn-secondary">Back</button>
+          <button id="quizNext" class="btn btn-primary">Next</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Control modal -->
+    <section id="modalControl" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="controlTitle">
+      <div class="modal-shell">
+        <div class="modal-header accent">
+          <div class="modal-title-row">
+            <h2 id="controlTitle">Recommendation source weighting</h2>
+            <span class="pill pill-accent">Customization</span>
+          </div>
+          <button class="icon-btn" id="controlClose" aria-label="Close">
+            ×
+          </button>
+        </div>
+
+        <div class="modal-body">
+          <div class="callout">
+            <p class="callout-title">How should we weight recommendation sources?</p>
+            <p class="callout-text">
+              Our system generates recommendations based on your preferences and feedback from other users.
+              You can customize your results by adjusting the balance using the slider below.
+            </p>
+          </div>
+
+          <div class="slider-block">
+            <input id="weightSlider" class="slider" type="range" min="0" max="100" value="50" />
+            <div class="slider-legend">
+              <div class="legend-col">
+                <div class="legend-strong">Your preferences</div>
+                <div class="tiny muted" id="lblPrefs">50%</div>
+              </div>
+              <div class="legend-mid">Balanced</div>
+              <div class="legend-col right">
+                <div class="legend-strong">Other users’ choices</div>
+                <div class="tiny muted" id="lblOthers">50%</div>
+              </div>
             </div>
           </div>
         </div>
-        <div class="footerRow" style="justify-content:flex-end">
-          <button class="nextBtn" id="controlConfirm" type="button">Confirm</button>
+
+        <div class="modal-footer">
+          <button id="controlConfirm" class="btn btn-primary">Confirm</button>
         </div>
       </div>
-    </div>
-  </div>
+    </section>
 
-  <!-- RESULTS -->
-  <div class="overlay" id="resultsOverlay">
-    <div class="modal" role="dialog" aria-modal="true">
-      <button class="close" id="resultsClose" aria-label="Close">×</button>
-      <div class="modalInner">
-        <div class="modalTitle" id="resultsTitle">Recommended for you</div>
+    <!-- Results modal -->
+    <section id="modalResults" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="resultsTitle">
+      <div class="modal-shell modal-wide">
+        <div class="modal-header">
+          <h2 id="resultsTitle">Recommended wines</h2>
+          <button class="icon-btn" id="resultsClose" aria-label="Close">
+            ×
+          </button>
+        </div>
 
-        <!--
-          IMPORTANT (manipulation layout)
-          Show the system's explanation + (optional) user options FIRST,
-          then the item list AFTER. This makes the "correction" affordance
-          feel like a post-result right (voice/repair) rather than just
-          another quiz question.
-        -->
-        <!-- Explanation + (optional) recourse FIRST -->
-        <div class="section">
-          <div class="panel">
-            <div class="sectionTitle">Why these recommendations?</div>
-            <div class="tiny" id="sourceLine"></div>
-            <p class="reasonPara" id="reasonPara"></p>
+        <div class="modal-body">
+          <div class="explain" id="explainBox">
+            <h3>Why these recommendations?</h3>
+            <div class="muted" id="sourceBalanceLine">Source balance: —</div>
+            <p id="reasoningPara" class="reasoning"></p>
 
-            <div id="recourseBlock" style="margin-top:12px; display:none;">
-              <div class="sectionTitle" style="margin-top:14px">Does this explanation accurately reflect your preferences?</div>
-              <div class="tiny">If anything is incorrect or missing, you can correct it and update your recommendations.</div>
-              <div class="row" style="margin-top:10px;">
-                <button class="mini" id="reasonYes">Yes, it looks right</button>
-                <button class="mini danger" id="reasonNo">No, I want to correct it</button>
+            <div id="recourseBlock" class="recourse hidden">
+              <div class="recourse-q">
+                <div class="label">Question</div>
+                <div class="qtext">Does this profile accurately reflect your preferences?</div>
               </div>
 
-              <!-- signal removal UI (appears after "No") -->
-              <div id="signalEditor" style="display:none;margin-top:14px;">
-                <div class="sectionTitle">Optional: remove signals you don’t want us to use</div>
-                <div class="tiny">You can remove one or more signals below. Then choose <b>Apply update</b> or <b>Keep as is</b>.</div>
-                <div class="sigList" id="sigList"></div>
+              <div class="recourse-actions">
+                <button id="btnReasonYes" class="btn btn-secondary">Yes, it looks right</button>
+                <button id="btnReasonNo" class="btn btn-danger-outline">No, I want to correct it</button>
+              </div>
 
-                <div class="row" style="margin-top:12px;">
-                  <button class="mini" id="applyUpdateBtn">Apply update</button>
-                  <button class="mini" id="keepAsIsBtn">Keep as is</button>
+              <div id="recourseStatus" class="status hidden" role="status" aria-live="polite"></div>
+
+              <div id="repairPanel" class="repair hidden" aria-label="Correction panel">
+                <div class="repair-header">
+                  <h4>Correct your profile</h4>
+                  <p class="muted">
+                    We may have misread your preferences. Choose the option that fits you better.
+                    We'll refresh the recommendations once.
+                  </p>
+                </div>
+
+                <div id="profileOptions" class="profile-grid">
+                  <!-- injected -->
+                </div>
+
+                <div class="repair-footer">
+                  <button id="btnApplyProfile" class="btn btn-primary" disabled>Update my profile</button>
                 </div>
               </div>
-
-              <div class="toast ok" id="toastOk"></div>
-              <div class="toast info" id="toastInfo"></div>
-              <div class="toast warn" id="toastWarn"></div>
             </div>
           </div>
-        </div>
 
-        <!-- Recommendations AFTER the explanation/options -->
-        <div class="cards" id="cards"></div>
-
-        <div class="footerRow" style="justify-content:flex-end">
-          <button class="nextBtn" id="continueBtn" type="button">Continue</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- DONE -->
-  <div class="overlay" id="doneOverlay">
-    <div class="modal" role="dialog" aria-modal="true">
-      <div class="modalInner">
-        <div class="modalTitle">All set</div>
-        <div class="panel">
-          <div class="tiny">You can now return to the survey.</div>
-          <div class="tiny" style="margin-top:10px;">
-            If this page was opened from a survey link with a return URL, you will be redirected automatically.
-          </div>
-          <div class="tiny" style="margin-top:10px;">
-            If not, you can close this tab and return to your survey window.
+          <div class="recs" id="recsGrid">
+            <!-- injected -->
           </div>
         </div>
+
+        <div class="modal-footer">
+          <button id="btnContinue" class="btn btn-primary" disabled>Continue</button>
+        </div>
       </div>
-    </div>
+    </section>
+
+    <!-- Done modal -->
+    <section id="modalDone" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="doneTitle">
+      <div class="modal-shell">
+        <div class="modal-header">
+          <h2 id="doneTitle">All set</h2>
+        </div>
+        <div class="modal-body">
+          <div class="callout">
+            <p class="callout-text">
+              You can now return to the survey. If this page was opened from a survey link with a return URL,
+              you may be redirected automatically.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
   </div>
 
-<script>
-(() => {
-  const $ = (id) => document.getElementById(id);
-
-  // URL params
-  const params = new URLSearchParams(location.search);
-  const product = (params.get('product') || 'wine').toLowerCase();
-  const cond = (params.get('cond') || 'A').toUpperCase();
-  const hasControl = (cond === 'B' || cond === 'D');
-  const hasRecourse = (cond === 'C' || cond === 'D');
-  const returnUrl = params.get('return'); // optional redirect
-
-  // Brand
-  $('brandName').textContent = (product === 'usb') ? 'USB Shop' : 'Wine Shop';
-  $('heroTitle').textContent = (product === 'usb') ? 'USB recommendations' : 'Wine recommendations';
-  $('heroSub').textContent   = (product === 'usb')
-    ? 'Answer a few quick questions to get USB suggestions.'
-    : 'Answer a few quick questions to get wine suggestions.';
-  $('quizTitle').textContent = (product === 'usb') ? 'USB quick questions' : 'Wine quick questions';
-
-  // Overlays
-  const show = (el)=>el.classList.add('show');
-  const hide = (el)=>el.classList.remove('show');
-  const quizOverlay = $('quizOverlay');
-  const controlOverlay = $('controlOverlay');
-  const resultsOverlay = $('resultsOverlay');
-  const doneOverlay = $('doneOverlay');
-
-  // Quiz
-  const wineQuestions = [
-    {type:'choice', q:'Which taste profile do you generally prefer?', options:['Bold and intense','Smooth and balanced','Light and crisp',"Not sure"]},
-    {type:'slider', q:'Do you like wines that feel playful or refined?', left:'Playful', right:'Refined'},
-    {type:'slider', q:'Do you prefer fruit-forward or more structured flavors?', left:'Fruit-forward', right:'Structured'},
-    {type:'slider', q:'Are you planning to pair it with food or enjoy it on its own?', left:'With food', right:'On its own'},
-    {type:'slider', q:'Are you looking for something refreshing or something cozy?', left:'Refreshing', right:'Cozy'},
-  ];
-  const usbQuestions = [
-    {type:'choice', q:'What will you mainly use a USB drive for?', options:['Work files','Photos & videos','School','Mixed/General use']},
-    {type:'slider', q:'Do you prefer something compact or something rugged?', left:'Compact', right:'Rugged'},
-    {type:'slider', q:'How important is transfer speed to you?', left:'Not important', right:'Very important'},
-    {type:'slider', q:'Do you prioritize capacity or portability?', left:'Portability', right:'Capacity'},
-    {type:'slider', q:'Do you prefer something minimal or something premium?', left:'Minimal', right:'Premium'},
-  ];
-  const questions = (product === 'usb') ? usbQuestions : wineQuestions;
-  let step = 0;
-  const answers = Array(questions.length).fill(null);
-
-  function renderStep(){
-    const total = questions.length;
-    $('quizProgress').textContent = `${step+1} / ${total}`;
-    $('quizPrev').style.visibility = (step===0) ? 'hidden' : 'visible';
-    $('quizNext').textContent = (step===total-1) ? 'See recommendations' : 'Next';
-
-    const item = questions[step];
-    const area = $('quizStepArea');
-    area.innerHTML = '';
-
-    const qEl = document.createElement('div');
-    qEl.className = 'q';
-    qEl.textContent = item.q;
-    area.appendChild(qEl);
-
-    if(item.type === 'choice'){
-      const wrap = document.createElement('div');
-      wrap.className = 'choices';
-      item.options.forEach((opt, idx)=>{
-        const btn = document.createElement('div');
-        btn.className = 'choice' + (answers[step]===idx ? ' selected' : '');
-        btn.textContent = opt;
-        btn.addEventListener('click', ()=>{ answers[step]=idx; renderStep(); });
-        wrap.appendChild(btn);
-      });
-      area.appendChild(wrap);
-    } else {
-      if(answers[step] === null) answers[step] = 50;
-      const row = document.createElement('div');
-      row.className = 'sliderRow';
-      const input = document.createElement('input');
-      input.type='range'; input.min='0'; input.max='100'; input.value = answers[step];
-      input.addEventListener('input', ()=>{ answers[step]=Number(input.value); });
-      const labels = document.createElement('div');
-      labels.className='rangeLabels';
-      labels.innerHTML = `<span>${item.left}</span><span></span><span>${item.right}</span>`;
-      row.appendChild(input); row.appendChild(labels);
-      area.appendChild(row);
-    }
-  }
-
-  function bucket(val, lowLabel, midLabel, highLabel) {
-    if(val <= 35) return lowLabel;
-    if(val >= 65) return highLabel;
-    return midLabel;
-  }
-
-  function sourceWeights(){
-    if(hasControl) {
-      const other = Number($('balanceSlider').value);
-      const prod = 100 - other;
-      return {productDetails: prod, otherUsers: other};
-    }
-    return {productDetails: 50, otherUsers: 50};
-  }
-
-  function buildSignals(){
-    const sigs = [];
-    if(product === 'wine'){
-      const tasteIdx = answers[0];
-      const taste = (tasteIdx===0)?'bold & intense':(tasteIdx===1)?'smooth & balanced':(tasteIdx===2)?'light & crisp':'unspecified';
-      const refined = bucket(Number(answers[1]??50), 'more playful', 'balanced', 'more refined');
-      const structure = bucket(Number(answers[2]??50), 'more fruit-forward', 'balanced', 'more structured');
-      const pairing = bucket(Number(answers[3]??50), 'pairing with food', 'either way', 'enjoying on its own');
-      const temp = bucket(Number(answers[4]??50), 'more refreshing', 'in-between', 'more cozy');
-
-      sigs.push({id:'taste', label:`Taste profile: ${taste} (Q1)`, removed:false});
-      sigs.push({id:'mood', label:`Preference: ${temp} (Q5)`, removed:false});
-      sigs.push({id:'style', label:`Style: ${refined} (Q2)`, removed:false});
-      sigs.push({id:'context', label:`Context: ${pairing} (Q4)`, removed:false});
-      sigs.push({id:'flavor', label:`Flavor: ${structure} (Q3)`, removed:false});
-    } else {
-      const useIdx = answers[0];
-      const use = (useIdx===0)?'work files':(useIdx===1)?'photos & videos':(useIdx===2)?'school':'mixed use';
-      const rugged = bucket(Number(answers[1]??50), 'more compact', 'balanced', 'more rugged');
-      const speed = bucket(Number(answers[2]??50), 'speed not important', 'speed moderately important', 'speed very important');
-      const cap = bucket(Number(answers[3]??50), 'more portability', 'balanced', 'more capacity');
-      const premium = bucket(Number(answers[4]??50), 'more minimal', 'balanced', 'more premium');
-
-      sigs.push({id:'use', label:`Primary use: ${use} (Q1)`, removed:false});
-      sigs.push({id:'speed', label:`Preference: ${speed} (Q3)`, removed:false});
-      sigs.push({id:'form', label:`Form factor: ${rugged} (Q2)`, removed:false});
-      sigs.push({id:'priority', label:`Priority: ${cap} (Q4)`, removed:false});
-      sigs.push({id:'design', label:`Design: ${premium} (Q5)`, removed:false});
-    }
-    return sigs;
-  }
-
-  function renderReasonParagraph(sigs){
-    const w = sourceWeights();
-    const active = sigs.filter(s=>!s.removed).slice(0,3);
-    const activeText = active.map(s=>s.label.replace(/\s*\(Q\d\)/,'')).join('; ');
-    const mode = hasControl
-      ? `You set the source balance to ${w.productDetails}% your preferences and ${w.otherUsers}% other users’ choices.`
-      : `We used a balanced mix of ${w.productDetails}% your preferences and ${w.otherUsers}% other users’ choices.`;
-    $('reasonPara').textContent = `Based on your answers, we inferred a few signals about your preferences (e.g., ${activeText}). ${mode} We used these signals to prioritize the recommendations shown above.`;
-  }
-
-  // Product data with images
-  // Local, lightweight images (no external network requests).
-  // Included in the repo under /assets/img.
-  const imgWine = [
-    'assets/img/wine_red.jpg',
-    'assets/img/wine_white.jpg',
-    'assets/img/wine_sparkling.jpg',
-    'assets/img/wine_citrus.jpg',
-    'assets/img/wine_rose.jpg',
-    'assets/img/wine_oak.jpg'
-  ];
-  const imgUSB  = [
-    'assets/img/usb_slim.jpg',
-    'assets/img/usb_rugged.jpg',
-    'assets/img/usb_mini.jpg',
-    'assets/img/usb_flex.jpg',
-    'assets/img/usb_ruggedmax.jpg',
-    'assets/img/usb_minilite.jpg'
-  ];
-
-  const baseWine = [
-    {name:'Harmony Red Blend', img: imgWine[0], bullets:['Balanced red with ripe berries and a touch of spice.','Smooth, approachable style.','Good for dinners and casual sipping.']},
-    {name:'Radiance White', img: imgWine[1], bullets:['Crisp citrus and soft floral notes.','Light, refreshing feel.','Pairs well with light meals.']},
-    {name:'Velvet Sparkling', img: imgWine[2], bullets:['Lively and refreshing with a smooth finish.','Bright, celebration-friendly.','Enjoyable on its own or with snacks.']},
-  ];
-  const baseUSB = [
-    {name:'Streamline USB Drive', img: imgUSB[0], bullets:['Reliable everyday option for documents and backups.','Simple, durable design.','Easy to carry and use.']},
-    {name:'BoostSpeed USB Drive', img: imgUSB[1], bullets:['Performance-focused option for faster transfers.','Modern compact profile.','Good for moving large files.']},
-    {name:'VaultGuard USB Drive', img: imgUSB[2], bullets:['Security-oriented option for sensitive files.','Professional look and feel.','Designed for peace of mind.']},
-  ];
-
-  const altWine = [
-    {name:'Citrus Breeze White', img: imgWine[3], bullets:['A lighter, brighter option after removing a signal.','Crisp and easy-going.','Great for casual sipping.'], badge:'Updated', badgeType:'info'},
-    {name:'Cozy Orchard Rosé', img: imgWine[4], bullets:['A softer, comfort-forward option after removing a signal.','Gentle fruit notes.','Easy to enjoy in relaxed settings.'], badge:'Updated', badgeType:'info'},
-    {name:'Oak & Spice Red', img: imgWine[5], bullets:['A structured red-forward option after removing a signal.','More depth and spice.','Fits hearty meals.'], badge:'Updated', badgeType:'info'},
-  ];
-  const altUSB = [
-    {name:'FlexFit USB Drive', img: imgUSB[3], bullets:['A versatile option after removing a signal.','Lightweight and flexible.','Good all-purpose choice.'], badge:'Updated', badgeType:'info'},
-    {name:'RuggedMax USB Drive', img: imgUSB[4], bullets:['A tougher option after removing a signal.','More rugged build.','Better for travel and wear.'], badge:'Updated', badgeType:'info'},
-    {name:'MiniLite USB Drive', img: imgUSB[5], bullets:['A compact option after removing a signal.','Minimal design.','Convenient for everyday carry.'], badge:'Updated', badgeType:'info'},
-  ];
-
-  let items = [];
-  let signals = [];
-  let voiceAnswered = false;
-  let decisionRecorded = false;
-
-  function renderCards(flashIndex=null){
-    const cards = $('cards');
-    cards.innerHTML = '';
-    items.forEach((it, idx)=>{
-      const c = document.createElement('div');
-      c.className = 'pCard' + ((flashIndex===idx)?' flash':'');
-      const badge = it.badge ? `<span class="badge info">${it.badge}</span>` : '';
-      c.innerHTML = `
-        <div class="imgWrap"><img alt="" src="${it.img}"></div>
-        <div class="pBody">
-          <div class="pName">${it.name} ${badge}</div>
-          <ul>${it.bullets.map(b=>`<li>${b}</li>`).join('')}</ul>
-        </div>`;
-      cards.appendChild(c);
-      if(flashIndex===idx) setTimeout(()=>c.classList.remove('flash'), 600);
-    });
-  }
-
-  function toast(which, msg){
-    const el = which==='ok' ? $('toastOk') : which==='warn' ? $('toastWarn') : $('toastInfo');
-    el.textContent = msg;
-    el.classList.add('show');
-    setTimeout(()=>{ el.classList.remove('show'); }, 2600);
-  }
-
-  function resetRecourseUI(){
-    $('recourseBlock').style.display = hasRecourse ? 'block' : 'none';
-    $('signalEditor').style.display = 'none';
-    $('reasonYes').disabled = false;
-    $('reasonNo').disabled = false;
-    $('applyUpdateBtn').disabled = true;
-    $('keepAsIsBtn').disabled = true;
-
-    voiceAnswered = false;
-    decisionRecorded = !hasRecourse;
-    $('continueBtn').disabled = hasRecourse; // must answer in recourse conditions
-    if(!hasRecourse) $('continueBtn').disabled = false;
-  }
-
-  function renderSignalEditor(){
-    const list = $('sigList');
-    list.innerHTML = '';
-    signals.forEach(sig=>{
-      const row = document.createElement('div');
-      row.className = 'sigItem';
-
-      const txt = document.createElement('div');
-      txt.className = 'sigText' + (sig.removed ? ' removed' : '');
-      txt.textContent = sig.label;
-
-      const btn = document.createElement('button');
-      btn.className = 'mini danger';
-      btn.textContent = sig.removed ? 'Removed' : 'Remove';
-      btn.disabled = sig.removed;
-      btn.addEventListener('click', ()=>{
-        sig.removed = true;
-        renderSignalEditor();
-        renderReasonParagraph(signals);
-
-        const anyRemoved = signals.some(s=>s.removed);
-        $('applyUpdateBtn').disabled = !anyRemoved;
-        $('keepAsIsBtn').disabled = false;
-      });
-
-      row.appendChild(txt);
-      row.appendChild(btn);
-      list.appendChild(row);
-    });
-  }
-
-  function showResults(){
-    $('resultsTitle').textContent = (product === 'usb') ? 'Recommended USB drives' : 'Recommended wines';
-    const w = sourceWeights();
-    $('sourceLine').textContent = hasControl
-      ? `Source balance: ${w.productDetails}% your preferences · ${w.otherUsers}% other users’ choices`
-      : `Source balance: ${w.productDetails}% your preferences · ${w.otherUsers}% other users’ choices`;
-
-    items = JSON.parse(JSON.stringify((product==='usb')?baseUSB:baseWine));
-    renderCards();
-
-    signals = buildSignals();
-    renderReasonParagraph(signals);
-
-    resetRecourseUI();
-    show(resultsOverlay);
-    // Ensure modal content starts at top (fix for some browsers)
-    resultsOverlay.querySelector('.modalInner').scrollTop = 0;
-  }
-
-  // Start
-  $('startBtn').addEventListener('click', ()=>{
-    step=0;
-    for(let i=0;i<answers.length;i++) answers[i]=null;
-    renderStep();
-    show(quizOverlay);
-  });
-
-  // Close buttons
-  $('quizClose').addEventListener('click', ()=> hide(quizOverlay));
-  $('controlClose').addEventListener('click', ()=> hide(controlOverlay));
-  $('resultsClose').addEventListener('click', ()=> hide(resultsOverlay));
-      // Quiz navigation
-  $('quizPrev').addEventListener('click', ()=>{ if(step>0){ step--; renderStep(); } });
-  $('quizNext').addEventListener('click', ()=>{
-    const item = questions[step];
-    if(item.type === 'choice' && answers[step] === null){
-      alert('Please select one option to continue.');
-      return;
-    }
-    if(step < questions.length - 1){ step++; renderStep(); return; }
-    hide(quizOverlay);
-    if(hasControl) show(controlOverlay);
-    else showResults();
-  });
-
-  // Control confirm
-  $('controlConfirm').addEventListener('click', ()=>{ hide(controlOverlay); showResults(); });
-
-  // Recourse voice
-  $('reasonYes').addEventListener('click', ()=>{
-    if(!hasRecourse || voiceAnswered) return;
-    voiceAnswered = true;
-    decisionRecorded = true;
-
-    $('reasonYes').disabled = true;
-    $('reasonNo').disabled = true;
-    $('continueBtn').disabled = false;
-    toast('ok', 'Thanks — saved.');
-  });
-
-  $('reasonNo').addEventListener('click', ()=>{
-    if(!hasRecourse || voiceAnswered) return;
-    voiceAnswered = true;
-
-    $('reasonYes').disabled = true;
-    $('reasonNo').disabled = true;
-
-    $('signalEditor').style.display = 'block';
-    renderSignalEditor();
-    toast('info', 'You can remove signals below, then apply an update or keep the current results.');
-    $('keepAsIsBtn').disabled = false;
-    // scroll a bit to bring the editor into view (but do not force if user prefers)
-    const inner = resultsOverlay.querySelector('.modalInner');
-    const editorTop = $('signalEditor').offsetTop;
-    inner.scrollTo({ top: editorTop - 10, behavior: 'smooth' });
-  });
-
-  // Recourse repair decision
-  function lockSignalEditor(){
-    $('applyUpdateBtn').disabled = true;
-    $('keepAsIsBtn').disabled = true;
-    Array.from(document.querySelectorAll('#sigList button')).forEach(b=>b.disabled=true);
-  }
-
-  $('applyUpdateBtn').addEventListener('click', ()=>{
-    if(!hasRecourse || decisionRecorded) return;
-    const anyRemoved = signals.some(s=>s.removed);
-    if(!anyRemoved){
-      toast('warn', 'Please remove at least one signal to apply an update.');
-      return;
-    }
-    decisionRecorded = true;
-
-    const removedCount = signals.filter(s=>s.removed).length;
-    const pool = (product==='usb') ? altUSB : altWine;
-    const pick = pool[(removedCount-1) % pool.length];
-
-    items[0] = JSON.parse(JSON.stringify(pick));
-    renderCards(0);
-
-    toast('ok', 'Update applied.');
-    $('continueBtn').disabled = false;
-    lockSignalEditor();
-  });
-
-  $('keepAsIsBtn').addEventListener('click', ()=>{
-    if(!hasRecourse || decisionRecorded) return;
-    decisionRecorded = true;
-    toast('info', 'Saved. Keeping current results.');
-    $('continueBtn').disabled = false;
-    lockSignalEditor();
-  });
-
-  // Continue
-  $('continueBtn').addEventListener('click', ()=>{
-    hide(resultsOverlay);
-    if(returnUrl) {
-      // Safe-ish redirect: only if it's a valid URL string.
-      try {
-        const u = new URL(returnUrl);
-        location.href = u.toString();
-        return;
-      } catch(e) {
-        // fall through
-      }
-    }
-    show(doneOverlay);
-  });
-
-  // init quiz
-  renderStep();
-})();
-</script>
+  <script src="assets/js/app.js"></script>
 </body>
 </html>
