@@ -170,6 +170,23 @@
     </div>
   </div>
 
+
+  <!-- PROFILE (page break) -->
+  <div class="overlay" id="profileOverlay">
+    <div class="modal" role="dialog" aria-modal="true">
+      <div class="modalInner">
+        <div class="modalTitle">Profile created</div>
+        <div class="panel">
+          <div class="tiny">Thanks. Your responses have been collected and saved to your user profile.</div>
+          <div class="tiny" id="profileNextLine" style="margin-top:10px"></div>
+        </div>
+        <div class="footerRow" style="justify-content:flex-end">
+          <button class="nextBtn" id="profileContinue" type="button">Continue</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- CONTROL -->
   <div class="overlay" id="controlOverlay">
     <div class="modal" role="dialog" aria-modal="true">
@@ -278,6 +295,11 @@
   const hasRecourse = (cond === 'C' || cond === 'D');
   const hasExplain = (cond !== 'E'); // E = no transparency
 
+  // Page break message (separates quiz from the next step)
+  $('profileNextLine').textContent = hasControl
+    ? 'Next, you will adjust the recommendation source weighting.'
+    : 'Next, you will see your recommendations.';
+
   // Completion codes (unique by product × condition).
   // In Recourse conditions (C/D), the last digit indicates whether the user applied a correction:
   // 0 = no correction applied, 1 = correction applied.
@@ -299,6 +321,7 @@
   const hide = (el)=>el.classList.remove('show');
 
   const quizOverlay = $('quizOverlay');
+  const profileOverlay = $('profileOverlay');
   const controlOverlay = $('controlOverlay');
   const resultsOverlay = $('resultsOverlay');
   const doneOverlay = $('doneOverlay');
@@ -573,6 +596,11 @@
     }
     if(step < questions.length - 1){ step++; renderStep(); return; }
     hide(quizOverlay);
+    show(profileOverlay);
+  });
+
+  $('profileContinue').addEventListener('click', ()=>{
+    hide(profileOverlay);
     if(hasControl) show(controlOverlay);
     else showResults();
   });

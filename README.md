@@ -38,3 +38,7 @@ Recourse tracking:
 
 
 v81: Adds image cache-buster (uses ?v=) and safe fallback for missing images.
+
+
+## Page break
+After the quiz, participants see a short "Profile created" page before the next step (control slider or recommendations).
