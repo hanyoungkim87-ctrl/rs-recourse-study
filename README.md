@@ -1,4 +1,4 @@
-# Profile-based Recourse + Control stimuli (v80)
+# Profile-based Recourse + Control stimuli (v81)
 
 This build includes BOTH product contexts (wine + USB) and 5 conditions:
 
@@ -35,3 +35,6 @@ Recourse tracking:
   - 1 = correction applied
   Examples: wine C not corrected = 1300; wine C corrected = 1301.
 
+
+
+v81: Adds image cache-buster (uses ?v=) and safe fallback for missing images.
