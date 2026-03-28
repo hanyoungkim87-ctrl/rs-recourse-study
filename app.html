@@ -125,6 +125,19 @@
     .toast.info{background:var(--infobg);border:1px solid var(--infobd);color:var(--info)}
     .toast.warn{background:var(--warnbg);border:1px solid var(--warnbd);color:var(--warn)}
 
+    .codeValue{
+      margin-top:10px;
+      display:inline-block;
+      padding:12px 14px;
+      border:1px dashed var(--border);
+      border-radius:14px;
+      background:#fff;
+      font-size:28px;
+      font-weight:900;
+      letter-spacing:2px;
+      user-select:all;
+    }
+
     html, body{height:100%}
   </style>
 </head>
@@ -242,6 +255,12 @@
         <div class="modalTitle">All set</div>
         <div class="panel">
           <div class="tiny">Please return to the survey tab to continue.</div>
+
+          <div style="margin-top:14px">
+            <div class="sectionTitle">Completion code</div>
+            <div class="tiny">Please copy (or write down) this code and paste it into the survey.</div>
+            <div class="codeValue" id="completionCode" tabindex="0" aria-label="Completion code">----</div>
+          </div>
         </div>
       </div>
     </div>
@@ -256,6 +275,14 @@
   const hasControl = (cond === 'B' || cond === 'D');
   const hasRecourse = (cond === 'C' || cond === 'D');
   const hasExplain = (cond !== 'E'); // E = no transparency
+
+  // Completion codes (unique by product × condition).
+  // In Recourse conditions (C/D), the last digit indicates whether the user applied a correction:
+  // 0 = no correction applied, 1 = correction applied.
+  const BASE_CODES = {
+    wine: { A: '1100', B: '1200', C: '1300', D: '1400', E: '1500' },
+    usb:  { A: '2100', B: '2200', C: '2300', D: '2400', E: '2500' },
+  };
 
   $('brandName').textContent = (product === 'usb') ? 'USB Shop' : 'Wine Shop';
   $('heroTitle').textContent = (product === 'usb') ? 'USB recommendations' : 'Wine recommendations';
@@ -423,10 +450,20 @@
     return entries[0][0];
   }
 
+  let initialProfileKey = null;
   let currentProfileKey = null;
   let items = [];
   let recourseDone = false;
+  let recourseCorrected = false;
   let selectedProfileKey = null;
+
+  function getCompletionCode() {
+    const base = (BASE_CODES[product] && BASE_CODES[product][cond]) ? BASE_CODES[product][cond] : '0000';
+    let n = parseInt(base, 10);
+    if ((cond === 'C' || cond === 'D') && recourseCorrected) n += 1;
+    return String(n).padStart(4, '0');
+  }
+
 
   function renderCards(flash=false) {
     const cards = $('cards');
@@ -502,7 +539,9 @@
   }
 
   function showResults() {
-    currentProfileKey = inferProfileKey();
+    initialProfileKey = inferProfileKey();
+    currentProfileKey = initialProfileKey;
+    recourseCorrected = false;
     items = pickSet(currentProfileKey).map(x=>Object.assign({}, x));
     renderCards(false);
     renderExplanation();
@@ -566,7 +605,12 @@
       toast('warn', 'Please select a profile to continue.');
       return;
     }
+    if(selectedProfileKey === initialProfileKey){
+      toast('warn', 'That is already the current profile. If it looks right, choose “Keep as is.”');
+      return;
+    }
     recourseDone = true;
+    recourseCorrected = true;
     currentProfileKey = selectedProfileKey;
 
     // refresh recommendations
@@ -596,8 +640,27 @@
 
   $('continueBtn').addEventListener('click', ()=>{
     hide(resultsOverlay);
+    const code = getCompletionCode();
+    const codeEl = $('completionCode');
+    if(codeEl) codeEl.textContent = code;
     show(doneOverlay);
+    // Hint: click/tap the code to select it for copying.
+    if(codeEl) codeEl.focus();
   });
+  // Make the completion code easy to copy (select-on-click).
+  const completionCodeEl = $('completionCode');
+  if (completionCodeEl) {
+    completionCodeEl.addEventListener('click', () => {
+      try {
+        const range = document.createRange();
+        range.selectNodeContents(completionCodeEl);
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+      } catch (e) {}
+    });
+  }
+
 
   renderStep();
 })();

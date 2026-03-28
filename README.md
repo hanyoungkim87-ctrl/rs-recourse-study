@@ -1,4 +1,4 @@
-# Profile-based Recourse + Control stimuli (v79)
+# Profile-based Recourse + Control stimuli (v80)
 
 This build includes BOTH product contexts (wine + USB) and 5 conditions:
 
@@ -21,3 +21,17 @@ This build uses exactly 6 images per product type:
 Replace those files (same filenames) with your own photos.
 
 Build: 2026-03-28 18:55:54Z UTC
+
+## Completion codes (shown on the final screen)
+Each product × condition has a unique 4-digit code to copy/paste into the survey.
+
+Base codes:
+- Wine: A=1100, B=1200, C=1300, D=1400, E=1500
+- USB:  A=2100, B=2200, C=2300, D=2400, E=2500
+
+Recourse tracking:
+- In Recourse conditions (C/D), the last digit indicates whether the participant applied a correction:
+  - 0 = no correction applied
+  - 1 = correction applied
+  Examples: wine C not corrected = 1300; wine C corrected = 1301.
+
