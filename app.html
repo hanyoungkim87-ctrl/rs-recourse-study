@@ -2,194 +2,605 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Wine recommendations</title>
-  <link rel="stylesheet" href="assets/css/style.css" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Shopping Recommendations</title>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <style>
+    :root{
+      --bg:#f7f3ea; --ink:#1a1a1a; --muted:#5a5a5a;
+      --card:#ffffff; --border:#e6e0d6;
+      --accent:#2f6f4e; --accent2:#2b4c8a;
+      --shadow:0 10px 40px rgba(0,0,0,.10);
+      --hi:#fff3b0;
+      --okbg:#f2f7f4; --okbd:rgba(47,111,78,.35); --ok:#1f5a3f;
+      --infobg:#eef4ff; --infobd:#d8e6ff; --info:#2b4c8a;
+      --warnbg:#fff5f5; --warnbd:#ffd7d7; --warn:#a52424;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+    .hero{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:36px 16px;background:linear-gradient(180deg, rgba(0,0,0,.03), rgba(0,0,0,0));}
+    .heroCard{width:min(980px, 100%);background:var(--card);border:1px solid var(--border);border-radius:22px;box-shadow:var(--shadow);overflow:hidden;}
+    .heroTop{padding:26px 26px 10px}
+    .brand{display:flex;align-items:center;gap:10px}
+    .dot{width:10px;height:10px;border-radius:999px;background:var(--accent)}
+    h1{margin:12px 0 6px;font-size:38px;letter-spacing:.2px}
+    .sub{margin:0;color:var(--muted);font-size:15px;line-height:1.4}
+    .heroBottom{padding:0 26px 26px;display:flex;gap:12px;align-items:center;justify-content:flex-end;flex-wrap:wrap}
+    .btn{appearance:none;border:0;border-radius:999px;padding:12px 18px;background:var(--accent);color:#fff;font-weight:650;cursor:pointer}
+    .btn:hover{filter:brightness(.95)}
+
+    /* OVERLAYS: scroll safe */
+    .overlay{
+      position:fixed; inset:0; background:rgba(0,0,0,.35);
+      display:none; padding:22px;
+      align-items:flex-start; justify-content:center;
+      overflow-y:auto; -webkit-overflow-scrolling:touch;
+      z-index:50;
+    }
+    .overlay.show{display:flex}
+    .modal{
+      width:min(980px, 100%);
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:22px;
+      box-shadow:var(--shadow);
+      position:relative;
+      display:flex;
+      flex-direction:column;
+      max-height:calc(100vh - 44px);
+    }
+    .close{
+      position:absolute; top:14px; right:14px;
+      width:38px; height:38px; border-radius:999px;
+      border:1px solid var(--border);
+      background:#fff; cursor:pointer;
+      font-size:20px; line-height:36px;
+      text-align:center; color:#222;
+      z-index:2;
+    }
+    .modalInner{
+      padding:22px;
+      overflow-y:auto;
+      -webkit-overflow-scrolling:touch;
+    }
+    .modalTitle{font-size:24px;margin:0 0 14px;font-weight:800}
+    .step{font-size:13px;color:#666;margin-left:8px}
+
+    /* QUIZ */
+    .q{font-size:20px;margin:0 0 12px;font-weight:750}
+    .choices{display:flex;flex-direction:column;gap:10px;margin-top:8px}
+    .choice{border:1px solid var(--border);border-radius:12px;padding:12px 12px;background:#fbfaf8;cursor:pointer;font-size:15px}
+    .choice:hover{background:#f4f1eb}
+    .choice.selected{outline:2px solid rgba(47,111,78,.35);border-color:rgba(47,111,78,.55);background:#f2f7f4}
+    .sliderRow{margin-top:14px}
+    input[type=range]{width:100%}
+    .rangeLabels{display:flex;justify-content:space-between;color:#444;margin-top:8px;font-size:13px}
+    .footerRow{display:flex;justify-content:space-between;gap:10px;margin-top:16px;flex-wrap:wrap}
+    .nextBtn{border:0;border-radius:999px;padding:12px 18px;background:var(--accent);color:#fff;font-weight:650;cursor:pointer}
+    .nextBtn.secondary{background:#f3efe7;color:#111;border:1px solid var(--border)}
+    .nextBtn:disabled{opacity:.45;cursor:not-allowed;background:#c7c0b6}
+
+    /* CONTROL modal style */
+    .controlHeader{background:var(--infobg);border:1px solid var(--infobd);border-radius:16px;padding:14px;margin-bottom:12px}
+    .controlTitle{font-size:18px;margin:0 0 6px;font-weight:850;color:var(--info)}
+    .controlCopy{margin:0;color:#234;line-height:1.35;font-size:14px}
+
+    /* RESULTS */
+    .section{margin-top:16px}
+    .sectionTitle{font-weight:850;margin:0 0 8px;font-size:14px;color:#222}
+    .panel{border:1px solid var(--border);border-radius:14px;padding:14px;background:#fbfaf8}
+    .reasonPara{margin:8px 0 0;color:#222;font-size:14px;line-height:1.45}
+    .tiny{font-size:12px;color:#666;line-height:1.4}
+
+    .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-top:12px}
+    .pCard{border:1px solid var(--border);border-radius:14px;padding:12px;background:#fff;position:relative;display:flex;gap:10px}
+    .pCard.flash{outline:3px solid var(--hi)}
+    .imgWrap{flex:0 0 92px}
+    .imgWrap img{width:92px;height:120px;object-fit:contain;border-radius:12px;border:1px solid var(--border);background:#fff}
+    .pBody{flex:1}
+    .pName{font-weight:850;margin:0 0 6px;font-size:15px}
+    .badge{display:inline-block;font-size:12px;border:1px solid var(--border);border-radius:999px;padding:3px 8px;margin-left:6px;color:#444;background:#f3efe7;vertical-align:middle}
+    .badge.info{background:var(--infobg);border-color:var(--infobd);color:var(--info)}
+    ul{margin:0;padding-left:18px;color:#444;font-size:13px}
+    li{margin:6px 0}
+
+    /* Recourse */
+    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .mini{border:1px solid var(--border);background:#fff;border-radius:999px;padding:9px 12px;cursor:pointer;font-weight:700;font-size:13px}
+    .mini:hover{background:#f6f3ee}
+    .mini:disabled{opacity:.45;cursor:not-allowed}
+    .mini.danger{border-color:var(--warnbd);background:var(--warnbg);color:var(--warn)}
+    .profileGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-top:10px}
+    .profileCard{border:1px solid var(--border);border-radius:12px;background:#fff;padding:10px;cursor:pointer}
+    .profileCard:hover{background:#fbfaf8}
+    .profileCard.selected{outline:2px solid rgba(43,76,138,.35);border-color:rgba(43,76,138,.5)}
+    .profileName{font-weight:850;margin:0 0 6px;font-size:14px}
+    .profileDesc{margin:0;color:#555;font-size:12px;line-height:1.35}
+
+    .toast{display:none;margin-top:10px;border-radius:12px;padding:10px 12px;font-size:13px}
+    .toast.show{display:block}
+    .toast.ok{background:var(--okbg);border:1px solid var(--okbd);color:var(--ok)}
+    .toast.info{background:var(--infobg);border:1px solid var(--infobd);color:var(--info)}
+    .toast.warn{background:var(--warnbg);border:1px solid var(--warnbd);color:var(--warn)}
+
+    html, body{height:100%}
+  </style>
 </head>
 <body>
-  <div id="app" class="app">
-    <header class="topbar">
-      <div class="brand">
-        <span class="dot" aria-hidden="true"></span>
-        <span class="brand-title">Wine Shop</span>
+  <div class="hero">
+    <div class="heroCard">
+      <div class="heroTop">
+        <div class="brand"><span class="dot"></span><span id="brandName" style="font-weight:800;color:#2b2b2b">Shop</span></div>
+        <h1 id="heroTitle">Recommendations</h1>
+        <p class="sub" id="heroSub">Answer a few quick questions to get tailored suggestions.</p>
       </div>
-    </header>
-
-    <main class="main">
-      <section class="card landing" id="landing">
-        <h1>Wine recommendations</h1>
-        <p class="muted">Answer a few quick questions to get wine suggestions.</p>
-
-        <div id="condPicker" class="cond-picker hidden" aria-label="Condition picker (for testing only)">
-          <label class="label" for="condSelect">Condition (for testing)</label>
-          <select id="condSelect" class="select">
-            <option value="A">A — Explanation only</option>
-            <option value="B">B — Explanation + Control</option>
-            <option value="C">C — Explanation + Recourse</option>
-            <option value="D" selected>D — Explanation + Control + Recourse</option>
-          </select>
-          <p class="tiny muted">In the experiment, you can hide this by providing <code>cond=A/B/C/D</code> in the URL.</p>
-        </div>
-
-        <div class="actions">
-          <button id="btnStart" class="btn btn-primary">Start</button>
-        </div>
-      </section>
-    </main>
-
-    <!-- Modal backdrop -->
-    <div id="backdrop" class="backdrop hidden" aria-hidden="true"></div>
-
-    <!-- Quiz modal -->
-    <section id="modalQuiz" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="quizTitle">
-      <div class="modal-shell">
-        <div class="modal-header">
-          <h2 id="quizTitle">Quick preference survey</h2>
-          <button class="icon-btn" id="quizClose" aria-label="Close">
-            ×
-          </button>
-        </div>
-
-        <div class="modal-body">
-          <div id="quizProgress" class="progress" aria-label="Progress">
-            <div id="quizProgressBar" class="progress-bar" style="width: 0%"></div>
-          </div>
-
-          <div id="quizSteps" class="steps">
-            <!-- injected -->
-          </div>
-        </div>
-
-        <div class="modal-footer">
-          <button id="quizBack" class="btn btn-secondary">Back</button>
-          <button id="quizNext" class="btn btn-primary">Next</button>
-        </div>
+      <div class="heroBottom">
+        <button class="btn" id="startBtn" type="button">Start</button>
       </div>
-    </section>
-
-    <!-- Control modal -->
-    <section id="modalControl" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="controlTitle">
-      <div class="modal-shell">
-        <div class="modal-header accent">
-          <div class="modal-title-row">
-            <h2 id="controlTitle">Recommendation source weighting</h2>
-            <span class="pill pill-accent">Customization</span>
-          </div>
-          <button class="icon-btn" id="controlClose" aria-label="Close">
-            ×
-          </button>
-        </div>
-
-        <div class="modal-body">
-          <div class="callout">
-            <p class="callout-title">How should we weight recommendation sources?</p>
-            <p class="callout-text">
-              Our system generates recommendations based on your preferences and feedback from other users.
-              You can customize your results by adjusting the balance using the slider below.
-            </p>
-          </div>
-
-          <div class="slider-block">
-            <input id="weightSlider" class="slider" type="range" min="0" max="100" value="50" />
-            <div class="slider-legend">
-              <div class="legend-col">
-                <div class="legend-strong">Your preferences</div>
-                <div class="tiny muted" id="lblPrefs">50%</div>
-              </div>
-              <div class="legend-mid">Balanced</div>
-              <div class="legend-col right">
-                <div class="legend-strong">Other users’ choices</div>
-                <div class="tiny muted" id="lblOthers">50%</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="modal-footer">
-          <button id="controlConfirm" class="btn btn-primary">Confirm</button>
-        </div>
-      </div>
-    </section>
-
-    <!-- Results modal -->
-    <section id="modalResults" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="resultsTitle">
-      <div class="modal-shell modal-wide">
-        <div class="modal-header">
-          <h2 id="resultsTitle">Recommended wines</h2>
-          <button class="icon-btn" id="resultsClose" aria-label="Close">
-            ×
-          </button>
-        </div>
-
-        <div class="modal-body">
-          <div class="explain" id="explainBox">
-            <h3>Why these recommendations?</h3>
-            <div class="muted" id="sourceBalanceLine">Source balance: —</div>
-            <p id="reasoningPara" class="reasoning"></p>
-
-            <div id="recourseBlock" class="recourse hidden">
-              <div class="recourse-q">
-                <div class="label">Question</div>
-                <div class="qtext">Does this profile accurately reflect your preferences?</div>
-              </div>
-
-              <div class="recourse-actions">
-                <button id="btnReasonYes" class="btn btn-secondary">Yes, it looks right</button>
-                <button id="btnReasonNo" class="btn btn-danger-outline">No, I want to correct it</button>
-              </div>
-
-              <div id="recourseStatus" class="status hidden" role="status" aria-live="polite"></div>
-
-              <div id="repairPanel" class="repair hidden" aria-label="Correction panel">
-                <div class="repair-header">
-                  <h4>Correct your profile</h4>
-                  <p class="muted">
-                    We may have misread your preferences. Choose the option that fits you better.
-                    We'll refresh the recommendations once.
-                  </p>
-                </div>
-
-                <div id="profileOptions" class="profile-grid">
-                  <!-- injected -->
-                </div>
-
-                <div class="repair-footer">
-                  <button id="btnApplyProfile" class="btn btn-primary" disabled>Update my profile</button>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="recs" id="recsGrid">
-            <!-- injected -->
-          </div>
-        </div>
-
-        <div class="modal-footer">
-          <button id="btnContinue" class="btn btn-primary" disabled>Continue</button>
-        </div>
-      </div>
-    </section>
-
-    <!-- Done modal -->
-    <section id="modalDone" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="doneTitle">
-      <div class="modal-shell">
-        <div class="modal-header">
-          <h2 id="doneTitle">All set</h2>
-        </div>
-        <div class="modal-body">
-          <div class="callout">
-            <p class="callout-text">
-              You can now return to the survey. If this page was opened from a survey link with a return URL,
-              you may be redirected automatically.
-            </p>
-          </div>
-        </div>
-      </div>
-    </section>
-
+    </div>
   </div>
 
-  <script src="assets/js/app.js"></script>
+  <!-- QUIZ -->
+  <div class="overlay" id="quizOverlay">
+    <div class="modal" role="dialog" aria-modal="true">
+      <button class="close" id="quizClose" aria-label="Close">×</button>
+      <div class="modalInner">
+        <div class="modalTitle"><span id="quizTitle">Quick questions</span><span class="step" id="quizProgress">1 / 5</span></div>
+        <div id="quizStepArea"></div>
+        <div class="footerRow">
+          <button class="nextBtn secondary" id="quizPrev" type="button">Back</button>
+          <button class="nextBtn" id="quizNext" type="button">Next</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTROL -->
+  <div class="overlay" id="controlOverlay">
+    <div class="modal" role="dialog" aria-modal="true">
+      <button class="close" id="controlClose" aria-label="Close">×</button>
+      <div class="modalInner">
+        <div class="controlHeader">
+          <div class="controlTitle">Recommendation source weighting</div>
+          <p class="controlCopy">Our system generates recommendations based on your preferences and feedback from other users. You can customize your results by adjusting the balance using the slider below.</p>
+        </div>
+
+        <div class="panel">
+          <div class="sectionTitle">Source balance</div>
+          <div class="sliderRow">
+            <input type="range" min="0" max="100" value="50" id="balanceSlider" />
+            <div class="rangeLabels">
+              <span>Your preferences</span><span>Balanced</span><span>Other users’ choices</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="footerRow" style="justify-content:flex-end">
+          <button class="nextBtn" id="controlConfirm" type="button" style="background:var(--accent2)">Continue</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <div class="overlay" id="resultsOverlay">
+    <div class="modal" role="dialog" aria-modal="true">
+      <button class="close" id="resultsClose" aria-label="Close">×</button>
+      <div class="modalInner">
+        <div class="modalTitle" id="resultsTitle">Recommended for you</div>
+
+        <div id="explainBlock" class="section">
+          <div class="panel">
+            <div class="sectionTitle">Why these recommendations?</div>
+            <div class="tiny" id="sourceLine"></div>
+            <p class="reasonPara" id="reasonPara"></p>
+
+            <div id="recourseBlock" style="margin-top:12px; display:none;">
+              <div class="sectionTitle" style="margin-top:14px">Does this explanation accurately reflect your preferences?</div>
+              <div class="tiny" id="helperLine">If anything is incorrect or missing, you can correct it and update your recommendations.</div>
+              <div class="row" style="margin-top:10px;">
+                <button class="mini" id="reasonYes">Yes, it looks right</button>
+                <button class="mini danger" id="reasonNo">No, I want to correct it</button>
+              </div>
+
+              <div id="profileEditor" style="display:none;margin-top:14px;">
+                <div class="sectionTitle">Choose the profile that fits you better</div>
+                <div class="tiny">This corrects how we interpreted your responses. Your original answers remain saved.</div>
+                <div class="profileGrid" id="profileGrid"></div>
+                <div class="row" style="margin-top:12px;">
+                  <button class="mini" id="applyProfileBtn" disabled>Update my profile</button>
+                  <button class="mini" id="keepProfileBtn">Keep as is</button>
+                </div>
+              </div>
+
+              <div class="toast ok" id="toastOk"></div>
+              <div class="toast info" id="toastInfo"></div>
+              <div class="toast warn" id="toastWarn"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recommendations BELOW -->
+        <div class="section">
+          <div class="sectionTitle" id="recListTitle">Recommendations</div>
+          <div class="cards" id="cards"></div>
+        </div>
+
+        <div class="footerRow" style="justify-content:flex-end">
+          <button class="nextBtn" id="continueBtn" type="button">Continue</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DONE (no buttons, no close) -->
+  <div class="overlay" id="doneOverlay">
+    <div class="modal" role="dialog" aria-modal="true">
+      <div class="modalInner">
+        <div class="modalTitle">All set</div>
+        <div class="panel">
+          <div class="tiny">Please return to the survey tab to continue.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const params = new URLSearchParams(location.search);
+  const product = (params.get('product') || 'wine').toLowerCase();
+  const cond = (params.get('cond') || 'A').toUpperCase();
+  const hasControl = (cond === 'B' || cond === 'D');
+  const hasRecourse = (cond === 'C' || cond === 'D');
+  const hasExplain = (cond !== 'E'); // E = no transparency
+
+  $('brandName').textContent = (product === 'usb') ? 'USB Shop' : 'Wine Shop';
+  $('heroTitle').textContent = (product === 'usb') ? 'USB recommendations' : 'Wine recommendations';
+  $('heroSub').textContent   = (product === 'usb')
+    ? 'Answer a few quick questions to get USB suggestions.'
+    : 'Answer a few quick questions to get wine suggestions.';
+  $('quizTitle').textContent = (product === 'usb') ? 'USB quick questions' : 'Wine quick questions';
+  $('resultsTitle').textContent = (product === 'usb') ? 'Recommended USB drives' : 'Recommended wines';
+  $('recListTitle').textContent = (product === 'usb') ? 'Recommended USB drives' : 'Recommended wines';
+
+  const show = (el)=>el.classList.add('show');
+  const hide = (el)=>el.classList.remove('show');
+
+  const quizOverlay = $('quizOverlay');
+  const controlOverlay = $('controlOverlay');
+  const resultsOverlay = $('resultsOverlay');
+  const doneOverlay = $('doneOverlay');
+
+  // QUIZ questions (avoid reusing profile labels)
+  const wineQuestions = [
+    {type:'choice', q:'Which matters most for today’s wine pick?', options:['A familiar option I can count on','Something different from what I usually get','A fuller experience','A shareable, occasion-friendly pick']},
+    {type:'slider', q:'Do you prefer a more straightforward or more complex experience?', left:'Straightforward', right:'Complex'},
+    {type:'slider', q:'Do you lean toward lighter or heavier impressions?', left:'Lighter', right:'Heavier'},
+    {type:'slider', q:'Do you prefer sticking to what you know or exploring variety?', left:'What I know', right:'Variety'},
+    {type:'slider', q:'Is this mainly for everyday use or a special moment?', left:'Everyday', right:'Special'},
+  ];
+  const usbQuestions = [
+    {type:'choice', q:'What best describes your main goal for this USB drive?', options:['Simple everyday use','Trying new tools/features','High performance use','Sharing/handing off often']},
+    {type:'slider', q:'Do you prefer a more minimal or more feature-forward option?', left:'Minimal', right:'Feature-forward'},
+    {type:'slider', q:'Do you lean toward lighter carry or sturdier feel?', left:'Lighter', right:'Sturdier'},
+    {type:'slider', q:'Do you prioritize convenience or capability?', left:'Convenience', right:'Capability'},
+    {type:'slider', q:'Is this for routine use or a more important use case?', left:'Routine', right:'Important'},
+  ];
+  const questions = (product === 'usb') ? usbQuestions : wineQuestions;
+  let step = 0;
+  const answers = Array(questions.length).fill(null);
+
+  function renderStep(){
+    const total = questions.length;
+    $('quizProgress').textContent = `${step+1} / ${total}`;
+    $('quizPrev').style.visibility = (step===0) ? 'hidden' : 'visible';
+    $('quizNext').textContent = (step===total-1) ? 'See recommendations' : 'Next';
+    const item = questions[step];
+    const area = $('quizStepArea');
+    area.innerHTML = '';
+
+    const qEl = document.createElement('div');
+    qEl.className = 'q';
+    qEl.textContent = item.q;
+    area.appendChild(qEl);
+
+    if(item.type === 'choice'){
+      const wrap = document.createElement('div');
+      wrap.className = 'choices';
+      item.options.forEach((opt, idx)=>{
+        const btn = document.createElement('div');
+        btn.className = 'choice' + (answers[step]===idx ? ' selected' : '');
+        btn.textContent = opt;
+        btn.addEventListener('click', ()=>{ answers[step]=idx; renderStep(); });
+        wrap.appendChild(btn);
+      });
+      area.appendChild(wrap);
+    } else {
+      if(answers[step] === null) answers[step] = 50;
+      const row = document.createElement('div');
+      row.className = 'sliderRow';
+      const input = document.createElement('input');
+      input.type='range'; input.min='0'; input.max='100'; input.value = answers[step];
+      input.addEventListener('input', ()=>{ answers[step]=Number(input.value); });
+      const labels = document.createElement('div');
+      labels.className='rangeLabels';
+      labels.innerHTML = `<span>${item.left}</span><span></span><span>${item.right}</span>`;
+      row.appendChild(input); row.appendChild(labels);
+      area.appendChild(row);
+    }
+  }
+
+  function sourceWeights(){
+    if(hasControl) {
+      const other = Number($('balanceSlider').value);
+      const pref = 100 - other;
+      return {preferences: pref, otherUsers: other};
+    }
+    return {preferences: 50, otherUsers: 50};
+  }
+
+  // Profiles (system inference labels)
+  const wineProfiles = [
+    {key:'classic', name:'Classic Comfort', desc:'Familiar, dependable choices that work well across many situations.'},
+    {key:'bright', name:'Bright Explorer', desc:'Enjoys variety and discovery, with a tilt toward vivid, lively picks.'},
+    {key:'bold', name:'Bold Indulgence', desc:'Leans toward richer, higher-impact experiences and fuller impressions.'},
+    {key:'celebration', name:'Celebration Select', desc:'Occasion-oriented picks that feel easy to share and broadly appealing.'},
+  ];
+  const usbProfiles = [
+    {key:'classic', name:'Everyday Reliable', desc:'Practical, dependable choices that work for routine tasks.'},
+    {key:'bright', name:'Feature Explorer', desc:'Curious about trying new options and experimenting with capabilities.'},
+    {key:'bold', name:'Performance Focused', desc:'Prioritizes higher capability and stronger performance outcomes.'},
+    {key:'celebration', name:'Share & Go', desc:'Optimized for handoffs, convenience, and easy sharing in real situations.'},
+  ];
+  const profiles = (product==='usb') ? usbProfiles : wineProfiles;
+
+  // Product catalog (reuse 6 images per product)
+  function imgPath(idx) {
+    if(product==='usb') return `assets/img/usb_${idx}.jpg`;
+    return `assets/img/wine_${idx}.jpg`;
+  }
+
+  const wineCatalog = [
+    {id:'w1', name:'Harmony Red Blend', img: imgPath(1), bullets:['Balanced and approachable profile.','Easy to enjoy across occasions.','Popular choice for many tastes.']},
+    {id:'w2', name:'Radiance White', img: imgPath(2), bullets:['Light, clean feel with an easy finish.','Good for casual settings.','Simple, refreshing experience.']},
+    {id:'w3', name:'Velvet Sparkling', img: imgPath(3), bullets:['Bright and festive feel.','Works well for sharing.','Easygoing and celebratory.']},
+    {id:'w4', name:'Citrus Breeze White', img: imgPath(4), bullets:['Vivid, lively character.','Feels new/different from the usual.','Great for trying something fresh.']},
+    {id:'w5', name:'Oak & Spice Red', img: imgPath(5), bullets:['Richer, fuller impression.','More depth and presence.','Pairs well with heavier meals.']},
+    {id:'w6', name:'Cozy Orchard Rosé', img: imgPath(6), bullets:['Soft and flexible pick.','Easy to share with a crowd.','Comfortable, casual option.']},
+  ];
+
+  const usbCatalog = [
+    {id:'u1', name:'Streamline USB Drive', img: imgPath(1), bullets:['Straightforward everyday option.','Simple and reliable.','Easy to carry and use.']},
+    {id:'u2', name:'BoostSpeed USB Drive', img: imgPath(2), bullets:['Capability-focused option.','Better for moving larger files.','Designed for stronger performance.']},
+    {id:'u3', name:'VaultGuard USB Drive', img: imgPath(3), bullets:['Practical option for organized storage.','Designed to feel dependable.','Works well for routine needs.']},
+    {id:'u4', name:'MiniLite USB Drive', img: imgPath(4), bullets:['Compact and convenient.','Good for quick handoffs.','Easy to keep with you.']},
+    {id:'u5', name:'RuggedMax USB Drive', img: imgPath(5), bullets:['Sturdier feel for demanding use.','More durable design.','Fits heavier use cases.']},
+    {id:'u6', name:'FlexFit USB Drive', img: imgPath(6), bullets:['Versatile and flexible option.','Good all-purpose balance.','Works across many contexts.']},
+  ];
+
+  const catalog = (product==='usb') ? usbCatalog : wineCatalog;
+
+  function pickSet(profileKey) {
+    // return 3 item objects; ensure sets differ meaningfully
+    if(product==='wine') {
+      if(profileKey==='classic') return [catalog[0], catalog[1], catalog[5]];
+      if(profileKey==='bright') return [catalog[3], catalog[1], catalog[2]];
+      if(profileKey==='bold') return [catalog[4], catalog[0], catalog[1]];
+      return [catalog[2], catalog[5], catalog[1]]; // celebration
+    } else {
+      if(profileKey==='classic') return [catalog[0], catalog[2], catalog[5]];
+      if(profileKey==='bright') return [catalog[1], catalog[5], catalog[3]];
+      if(profileKey==='bold') return [catalog[1], catalog[4], catalog[2]];
+      return [catalog[3], catalog[5], catalog[0]]; // share&go
+    }
+  }
+
+  function inferProfileKey() {
+    // simple deterministic mapping from answers
+    const choice = answers[0];
+    let score = {classic:0, bright:0, bold:0, celebration:0};
+    if(choice===0) score.classic += 2;
+    if(choice===1) score.bright += 2;
+    if(choice===2) score.bold += 2;
+    if(choice===3) score.celebration += 2;
+
+    // sliders (1..4)
+    const s1 = Number(answers[1]??50);
+    const s2 = Number(answers[2]??50);
+    const s3 = Number(answers[3]??50);
+    const s4 = Number(answers[4]??50);
+
+    // map generically: complexity+heavier -> bold; variety -> bright; special -> celebration; straightforward+everyday -> classic
+    score.bold += (s1>60?1:0) + (s2>60?1:0);
+    score.bright += (s3>60?2:0);
+    score.celebration += (s4>60?2:0);
+    score.classic += (s1<40?1:0) + (s4<40?1:0);
+
+    const entries = Object.entries(score).sort((a,b)=>b[1]-a[1]);
+    return entries[0][0];
+  }
+
+  let currentProfileKey = null;
+  let items = [];
+  let recourseDone = false;
+  let selectedProfileKey = null;
+
+  function renderCards(flash=false) {
+    const cards = $('cards');
+    cards.innerHTML = '';
+    items.forEach((it, idx)=>{
+      const c = document.createElement('div');
+      c.className = 'pCard' + ((flash && idx===0)?' flash':'');
+      const badge = it.badge ? `<span class="badge info">${it.badge}</span>` : '';
+      c.innerHTML = `
+        <div class="imgWrap"><img alt="" src="${it.img}"></div>
+        <div class="pBody">
+          <div class="pName">${it.name} ${badge}</div>
+          <ul>${it.bullets.map(b=>`<li>${b}</li>`).join('')}</ul>
+        </div>`;
+      cards.appendChild(c);
+      if(flash && idx===0) setTimeout(()=>c.classList.remove('flash'), 600);
+    });
+  }
+
+  function toast(which, msg){
+    const el = which==='ok' ? $('toastOk') : which==='warn' ? $('toastWarn') : $('toastInfo');
+    el.textContent = msg;
+    el.classList.add('show');
+    setTimeout(()=>{ el.classList.remove('show'); }, 2600);
+  }
+
+  function renderExplanation() {
+    if(!hasExplain) {
+      $('explainBlock').style.display = 'none';
+      return;
+    }
+    $('explainBlock').style.display = 'block';
+
+    const w = sourceWeights();
+    $('sourceLine').textContent = hasControl
+      ? `Source balance: ${w.preferences}% your preferences · ${w.otherUsers}% other users’ choices`
+      : `Source balance: ${w.preferences}% your preferences · ${w.otherUsers}% other users’ choices`;
+
+    const profObj = profiles.find(p=>p.key===currentProfileKey) || profiles[0];
+    const lead = (product==='usb')
+      ? 'Based on your answers, we inferred your overall device profile is'
+      : 'Based on your answers, we inferred your overall wine profile is';
+
+    $('reasonPara').innerHTML = `<b>${lead} “${profObj.name}.”</b> ${profObj.desc} We used this inferred profile—together with the source balance—to prioritize the recommendations shown below.`;
+  }
+
+  function resetRecourseUI() {
+    $('recourseBlock').style.display = (hasRecourse && hasExplain) ? 'block' : 'none';
+    $('profileEditor').style.display = 'none';
+    $('reasonYes').disabled = false;
+    $('reasonNo').disabled = false;
+    $('applyProfileBtn').disabled = true;
+    $('keepProfileBtn').disabled = false;
+    $('continueBtn').disabled = (hasRecourse && hasExplain); // require a response if recourse is present
+    recourseDone = false;
+    selectedProfileKey = null;
+  }
+
+  function renderProfileGrid() {
+    const grid = $('profileGrid');
+    grid.innerHTML = '';
+    profiles.forEach(p=>{
+      const card = document.createElement('div');
+      card.className = 'profileCard' + ((selectedProfileKey===p.key)?' selected':'');
+      card.innerHTML = `<div class="profileName">${p.name}</div><p class="profileDesc">${p.desc}</p>`;
+      card.addEventListener('click', ()=>{
+        selectedProfileKey = p.key;
+        $('applyProfileBtn').disabled = false;
+        renderProfileGrid();
+      });
+      grid.appendChild(card);
+    });
+  }
+
+  function showResults() {
+    currentProfileKey = inferProfileKey();
+    items = pickSet(currentProfileKey).map(x=>Object.assign({}, x));
+    renderCards(false);
+    renderExplanation();
+    resetRecourseUI();
+    show(resultsOverlay);
+    resultsOverlay.querySelector('.modalInner').scrollTop = 0;
+  }
+
+  // Start
+  $('startBtn').addEventListener('click', ()=>{
+    step=0;
+    for(let i=0;i<answers.length;i++) answers[i]=null;
+    renderStep();
+    show(quizOverlay);
+  });
+
+  $('quizClose').addEventListener('click', ()=> hide(quizOverlay));
+  $('controlClose').addEventListener('click', ()=> hide(controlOverlay));
+  $('resultsClose').addEventListener('click', ()=> hide(resultsOverlay));
+
+  $('quizPrev').addEventListener('click', ()=>{ if(step>0){ step--; renderStep(); } });
+  $('quizNext').addEventListener('click', ()=>{
+    const item = questions[step];
+    if(item.type === 'choice' && answers[step] === null){
+      alert('Please select one option to continue.');
+      return;
+    }
+    if(step < questions.length - 1){ step++; renderStep(); return; }
+    hide(quizOverlay);
+    if(hasControl) show(controlOverlay);
+    else showResults();
+  });
+
+  $('controlConfirm').addEventListener('click', ()=>{ hide(controlOverlay); showResults(); });
+
+  // Recourse
+  $('reasonYes').addEventListener('click', ()=>{
+    if(!hasRecourse || recourseDone) return;
+    recourseDone = true;
+    $('reasonYes').disabled = true;
+    $('reasonNo').disabled = true;
+    $('continueBtn').disabled = false;
+    toast('ok', 'Thanks — saved.');
+  });
+
+  $('reasonNo').addEventListener('click', ()=>{
+    if(!hasRecourse || recourseDone) return;
+    $('reasonYes').disabled = true;
+    $('reasonNo').disabled = true;
+    $('profileEditor').style.display = 'block';
+    renderProfileGrid();
+    toast('info', 'Choose the profile that fits you better, then update your profile.');
+    // bring editor into view smoothly
+    const inner = resultsOverlay.querySelector('.modalInner');
+    inner.scrollTo({ top: $('profileEditor').offsetTop - 10, behavior: 'smooth' });
+  });
+
+  $('applyProfileBtn').addEventListener('click', ()=>{
+    if(!hasRecourse || recourseDone) return;
+    if(!selectedProfileKey){
+      toast('warn', 'Please select a profile to continue.');
+      return;
+    }
+    recourseDone = true;
+    currentProfileKey = selectedProfileKey;
+
+    // refresh recommendations
+    const newSet = pickSet(currentProfileKey).map(x=>Object.assign({}, x));
+    newSet[0].badge = 'Updated';
+    items = newSet;
+    renderCards(true);
+    renderExplanation();
+
+    $('applyProfileBtn').disabled = true;
+    $('keepProfileBtn').disabled = true;
+    Array.from(document.querySelectorAll('.profileCard')).forEach(el=>el.style.pointerEvents='none');
+
+    toast('ok', 'Updated. We refreshed your recommendations.');
+    $('continueBtn').disabled = false;
+  });
+
+  $('keepProfileBtn').addEventListener('click', ()=>{
+    if(!hasRecourse || recourseDone) return;
+    recourseDone = true;
+    $('applyProfileBtn').disabled = true;
+    $('keepProfileBtn').disabled = true;
+    Array.from(document.querySelectorAll('.profileCard')).forEach(el=>el.style.pointerEvents='none');
+    toast('info', 'Saved. Keeping current profile.');
+    $('continueBtn').disabled = false;
+  });
+
+  $('continueBtn').addEventListener('click', ()=>{
+    hide(resultsOverlay);
+    show(doneOverlay);
+  });
+
+  renderStep();
+})();
+</script>
 </body>
 </html>

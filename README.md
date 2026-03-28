@@ -1,30 +1,23 @@
-# RS recourse study — profile-based recourse (static demo)
+# Profile-based Recourse + Control stimuli (v79)
 
-This folder is a **static** (HTML/CSS/JS) website you can host on GitHub Pages.
+This build includes BOTH product contexts (wine + USB) and 5 conditions:
 
-## How to run locally
-Open `app.html` in a browser, or run a local server:
+- A: Explanation only (no control, no recourse)
+- B: Explanation + Control (weighting slider)
+- C: Explanation + Recourse (contest + correct inferred profile)
+- D: Explanation + Control + Recourse
+- E: No transparency baseline (recommendations only)
 
-```bash
-python3 -m http.server 8000
-# then open http://localhost:8000/app.html
-```
+## URLs
+- `app.html?product=wine&cond=A&v=79`
+- `app.html?product=usb&cond=D&v=79`
+- `app.html?product=wine&cond=E&v=79`
 
-## Conditions (A/B/C/D)
-Use the URL parameter `cond`:
+## Images
+This build uses exactly 6 images per product type:
+- `assets/img/wine_1.jpg` ... `wine_6.jpg`
+- `assets/img/usb_1.jpg` ... `usb_6.jpg`
 
-- `cond=A` → Explanation only
-- `cond=B` → Explanation + Control (source weighting slider)
-- `cond=C` → Explanation + Recourse (profile correction)
-- `cond=D` → Explanation + Control + Recourse
+Replace those files (same filenames) with your own photos.
 
-Example:
-`app.html?cond=D`
-
-## Replace product images
-Images are placeholders in `assets/img/`. You can replace the files with your own images:
-
-- Keep the same filenames (recommended), **or**
-- Update `catalog` in `assets/js/app.js` to point to your new image paths.
-
-The UI uses `object-fit: contain` so tall images should not be cropped.
+Build: 2026-03-28 18:55:54Z UTC
