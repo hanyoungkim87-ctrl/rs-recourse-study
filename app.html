@@ -75,7 +75,74 @@
     .choice:hover{background:#f4f1eb}
     .choice.selected{outline:2px solid rgba(47,111,78,.35);border-color:rgba(47,111,78,.55);background:#f2f7f4}
     .sliderRow{margin-top:14px}
-    input[type=range]{width:100%}
+    input[type=range]{
+      -webkit-appearance:none;
+      appearance:none;
+      width:100%;
+      background:transparent;
+      height:32px;
+      margin:6px 0 0;
+    }
+    input[type=range]:focus{outline:none}
+    /* WebKit */
+    input[type=range]::-webkit-slider-runnable-track{
+      height:8px;
+      background:var(--border);
+      border-radius:999px;
+      border:1px solid var(--border);
+    }
+    input[type=range]::-webkit-slider-thumb{
+      -webkit-appearance:none;
+      appearance:none;
+      width:18px;height:18px;
+      border-radius:999px;
+      background:#fff;
+      border:2px solid rgba(0,0,0,.25);
+      box-shadow:0 2px 10px rgba(0,0,0,.12);
+      margin-top:-6px;
+    }
+    /* Firefox */
+    input[type=range]::-moz-range-track{
+      height:8px;
+      background:var(--border);
+      border-radius:999px;
+      border:1px solid var(--border);
+    }
+    input[type=range]::-moz-range-progress{
+      height:8px;
+      background:var(--border); /* same as track to avoid colored fill */
+      border-radius:999px;
+      border:1px solid var(--border);
+    }
+    input[type=range]::-moz-range-thumb{
+      width:18px;height:18px;
+      border-radius:999px;
+      background:#fff;
+      border:2px solid rgba(0,0,0,.25);
+      box-shadow:0 2px 10px rgba(0,0,0,.12);
+    }
+    /* Edge/IE */
+    input[type=range]::-ms-track{
+      height:8px;
+      background:transparent;
+      border-color:transparent;
+      color:transparent;
+    }
+    input[type=range]::-ms-fill-lower{
+      background:var(--border);
+      border-radius:999px;
+    }
+    input[type=range]::-ms-fill-upper{
+      background:var(--border);
+      border-radius:999px;
+    }
+    input[type=range]::-ms-thumb{
+      width:18px;height:18px;
+      border-radius:999px;
+      background:#fff;
+      border:2px solid rgba(0,0,0,.25);
+      box-shadow:0 2px 10px rgba(0,0,0,.12);
+    }
     .rangeLabels{display:flex;justify-content:space-between;color:#444;margin-top:8px;font-size:13px}
     .footerRow{display:flex;justify-content:space-between;gap:10px;margin-top:16px;flex-wrap:wrap}
     .nextBtn{border:0;border-radius:999px;padding:12px 18px;background:var(--accent);color:#fff;font-weight:650;cursor:pointer}
@@ -147,7 +214,7 @@
       <div class="heroTop">
         <div class="brand"><span class="dot"></span><span id="brandName" style="font-weight:800;color:#2b2b2b">Shop</span></div>
         <h1 id="heroTitle">Recommendations</h1>
-        <p class="sub" id="heroSub">Answer a few quick questions to get tailored suggestions.</p>
+        <p class="sub" id="heroSub">Answer a few quick questions to build your profile.</p>
       </div>
       <div class="heroBottom">
         <button class="btn" id="startBtn" type="button">Start</button>
@@ -310,9 +377,7 @@
 
   $('brandName').textContent = (product === 'usb') ? 'USB Shop' : 'Wine Shop';
   $('heroTitle').textContent = (product === 'usb') ? 'USB recommendations' : 'Wine recommendations';
-  $('heroSub').textContent   = (product === 'usb')
-    ? 'Answer a few quick questions to get USB suggestions.'
-    : 'Answer a few quick questions to get wine suggestions.';
+  $('heroSub').textContent   = 'Answer a few quick questions to build your profile.';
   $('quizTitle').textContent = (product === 'usb') ? 'USB quick questions' : 'Wine quick questions';
   $('resultsTitle').textContent = (product === 'usb') ? 'Recommended USB drives' : 'Recommended wines';
   $('recListTitle').textContent = (product === 'usb') ? 'Recommended USB drives' : 'Recommended wines';
@@ -349,7 +414,7 @@
     const total = questions.length;
     $('quizProgress').textContent = `${step+1} / ${total}`;
     $('quizPrev').style.visibility = (step===0) ? 'hidden' : 'visible';
-    $('quizNext').textContent = (step===total-1) ? 'See recommendations' : 'Next';
+    $('quizNext').textContent = (step===total-1 ) ? 'Finish profile building' : 'Next';
     const item = questions[step];
     const area = $('quizStepArea');
     area.innerHTML = '';
